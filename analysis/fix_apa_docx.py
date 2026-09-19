@@ -42,6 +42,21 @@ RUNNING_HEAD = "A VERSION-AWARE NEPALI STATUTORY BENCHMARK"
 MAX_RUNNING_HEAD = 50
 
 FONT = "Times New Roman"
+
+DEVANAGARI_FONT = "Nirmala UI"
+"""The font Word uses for Devanagari runs.
+
+Times New Roman has no Devanagari glyphs. Declaring it as the complex-script
+font (`w:cs`) makes Word render every Nepali word as tofu boxes, which is what
+the first build did: `मिति` printed as four empty rectangles in a paper about
+Nepali statutory text. The PDF looked typeset and said nothing.
+
+Nirmala UI ships with Windows 8 and later and is Microsoft's Devanagari UI
+face, so a reviewer opening the .docx has it already. A downloaded face such as
+Noto Sans Devanagari would render here and substitute on their machine, which
+is the same failure moved somewhere we cannot see it.
+"""
+
 SIZE_HALF_POINTS = "24"   # 12 pt
 LINE_DOUBLE = "480"       # 240 twentieths = single; 480 = double
 INDENT_FIRST = "720"      # 0.5 in in DXA
@@ -56,7 +71,8 @@ def _run_props(*, bold: bool = False, italic: bool = False) -> str:
     and italic are built here rather than appended by callers.
     """
     parts = [
-        f'<w:rFonts w:ascii="{FONT}" w:hAnsi="{FONT}" w:cs="{FONT}" w:eastAsia="{FONT}"/>'
+        f'<w:rFonts w:ascii="{FONT}" w:hAnsi="{FONT}" '
+        f'w:cs="{DEVANAGARI_FONT}" w:eastAsia="{FONT}"/>'
     ]
     if bold:
         parts.append("<w:b/><w:bCs/>")
@@ -71,9 +87,16 @@ def fix_styles(xml: str) -> str:
     # 1. Replace theme fonts in docDefaults with an explicit serif face.
     xml = re.sub(
         r'<w:rFonts[^/]*?w:asciiTheme="minorHAnsi"[^/]*?/>',
-        f'<w:rFonts w:ascii="{FONT}" w:hAnsi="{FONT}" w:cs="{FONT}" w:eastAsia="{FONT}"/>',
+        f'<w:rFonts w:ascii="{FONT}" w:hAnsi="{FONT}" '
+        f'w:cs="{DEVANAGARI_FONT}" w:eastAsia="{FONT}"/>',
         xml,
     )
+
+    # 1b. Every complex-script declaration inherited from the template still
+    # says Times New Roman, which has no Devanagari glyphs. Word picks the
+    # w:cs face for Devanagari runs, so these must be rewritten or the Nepali
+    # in this paper prints as empty boxes.
+    xml = xml.replace(f'w:cs="{FONT}"', f'w:cs="{DEVANAGARI_FONT}"')
     xml = xml.replace('<w:sz w:val="22"/>', f'<w:sz w:val="{SIZE_HALF_POINTS}"/>')
     xml = xml.replace('<w:szCs w:val="22"/>', f'<w:szCs w:val="{SIZE_HALF_POINTS}"/>')
 
@@ -142,7 +165,251 @@ def fix_styles(xml: str) -> str:
         if n == 0:
             print(f"  warning: style {style_id!r} not found", file=sys.stderr)
 
+    xml = ensure_table_style(xml)
+    xml = ensure_header_style(xml)
     return xml
+
+
+def ensure_header_style(xml: str) -> str:
+    """Define the `Header` style if the reference document has none.
+
+    Pandoc's default reference document defines no `Header` style, because it
+    emits no header part. This build synthesises one, so the style it points at
+    has to exist or the running head inherits body formatting (double spaced,
+    first-line indented) and pushes the page number onto a second line.
+    """
+    if 'w:styleId="Header"' in xml:
+        return xml
+    style = (
+        '<w:style w:type="paragraph" w:styleId="Header">'
+        '<w:name w:val="header"/><w:basedOn w:val="Normal"/>'
+        f'<w:pPr><w:tabs><w:tab w:val="right" w:pos="{RIGHT_TAB}"/></w:tabs>'
+        '<w:spacing w:after="0" w:before="0" w:line="240" w:lineRule="auto"/>'
+        '<w:ind w:firstLine="0"/><w:jc w:val="left"/></w:pPr>'
+        f'<w:rPr>{_run_props()}</w:rPr></w:style>'
+    )
+    return xml.replace("</w:styles>", style + "</w:styles>")
+
+
+TABLE_STYLE_ID = "Table"
+"""The table style Pandoc references on every table it emits.
+
+The APA template defines only `TableNormal` and never `Table`, so each table
+arrived pointing at a style that did not exist. Word then honoured no column
+widths and stacked every cell into a single column: Table 1 rendered as a
+vertical list of its own header labels, with the italic title broken
+mid-word down the right margin. The table markup was correct throughout; only
+the style it named was missing, and nothing in the package disagreed with
+itself.
+"""
+
+
+_TBLPR_RE = re.compile(r"<w:tblPr>.*?</w:tblPr>", re.DOTALL)
+_TBLW_RE = re.compile(r'<w:tblW [^>]*/>')
+
+TEXT_WIDTH_DXA = 9360
+"""The APA text column: 8.5in page less 1in margins, in twentieths of a point."""
+
+
+def fit_tables_to_page(xml: str) -> tuple[str, list[str]]:
+    """Give every table a width the page can actually hold.
+
+    Pandoc emitted the nine-column dataset table with
+    `<w:tblW w:w="9999999" w:type="pct">`, a preferred width Word cannot
+    satisfy inside a 6.5-inch text column. Word's response is not to shrink the
+    table but to abandon the layout: every cell is placed on its own line, so
+    Table 1 printed as a vertical list of its own header labels with the italic
+    title broken mid-word down the margin.
+
+    Each table is pinned to the text width and allowed to autofit its columns,
+    which is what a reader expects and what APA 7 shows in every sample table.
+    """
+    count = 0
+
+    def _fix(m: re.Match[str]) -> str:
+        nonlocal count
+        pr = m.group(0)
+        count += 1
+        # w:tblW must follow w:tblStyle in the CT_TblPrBase sequence.
+        fixed = _TBLW_RE.sub("", pr)
+        width = f'<w:tblW w:w="{TEXT_WIDTH_DXA}" w:type="dxa"/><w:tblLayout w:type="autofit"/>'
+        fixed = re.sub(r'<w:tblLayout [^>]*/>', "", fixed)
+        if "<w:tblStyle " in fixed:
+            return re.sub(r"(<w:tblStyle [^>]*/>)", r"\1" + width, fixed, count=1)
+        return fixed.replace("<w:tblPr>", f"<w:tblPr>{width}", 1)
+
+    out = _TBLPR_RE.sub(_fix, xml)
+    out = _widen_first_column(out)
+    out = _format_table_paragraphs(out)
+    return out, ([f"fitted {count} table(s) to the text width"] if count else [])
+
+
+_TBL_RE = re.compile(r"<w:tbl>.*?</w:tbl>", re.DOTALL)
+
+
+def _widen_first_column(xml: str) -> str:
+    """Give the label column the room its text needs.
+
+    Pandoc divides the width equally, so a nine-column table gets 1040 twips
+    (0.72in) per column. "Provisions" does not fit in 0.72in and Word breaks it
+    mid-word down the column: `Pr / ovisions`, `L / ettered`, `NS / UB / EP`.
+    A statistical table is read across its rows, and a header split over three
+    lines is not readable.
+
+    The first column holds the row labels (Act names) and the rest hold short
+    numbers, so the label column takes 40% and the remainder is shared. Cell
+    widths (`w:tcW`) are rewritten to match the grid, because Word honours the
+    cell width over the grid column when the two disagree.
+    """
+
+    def _fix_table(m: re.Match[str]) -> str:
+        tbl = m.group(0)
+        cols = re.findall(r"<w:gridCol [^>]*/>", tbl)
+        if len(cols) < 4:
+            return tbl  # narrow tables already fit
+
+        label = int(TEXT_WIDTH_DXA * 0.40)
+        rest = (TEXT_WIDTH_DXA - label) // (len(cols) - 1)
+        widths = [label] + [rest] * (len(cols) - 1)
+        widths[-1] += TEXT_WIDTH_DXA - sum(widths)  # absorb the rounding
+
+        grid = "".join(f'<w:gridCol w:w="{w}"/>' for w in widths)
+        tbl = re.sub(r"<w:tblGrid>.*?</w:tblGrid>",
+                     f"<w:tblGrid>{grid}</w:tblGrid>", tbl, count=1, flags=re.DOTALL)
+
+        # Rewrite each row's cell widths in column order.
+        def _fix_row(rm: re.Match[str]) -> str:
+            row = rm.group(0)
+            i = [0]
+
+            def _fix_cell(cm: re.Match[str]) -> str:
+                w = widths[i[0]] if i[0] < len(widths) else rest
+                i[0] += 1
+                return f'<w:tcW w:w="{w}" w:type="dxa"/>'
+
+            return re.sub(r"<w:tcW [^>]*/>", _fix_cell, row)
+
+        return re.sub(r"<w:tr(?: [^>]*)?>.*?</w:tr>", _fix_row, tbl, flags=re.DOTALL)
+
+    return _TBL_RE.sub(_fix_table, xml)
+
+
+def _format_table_paragraphs(xml: str) -> str:
+    """Single-space table cells and remove the body first-line indent.
+
+    A cell inherits `Normal`, which APA sets to double spacing with a 0.5in
+    first-line indent. In a table that indent pushes every value away from its
+    column edge and the double spacing makes a five-row table two pages long.
+    APA 7 permits single spacing inside a table where it aids readability, and
+    every sample table in the Publication Manual is set that way.
+    """
+
+    def _fix_table(m: re.Match[str]) -> str:
+        tbl = m.group(0)
+        fmt = ('<w:spacing w:after="0" w:before="0" w:line="240" '
+               'w:lineRule="auto"/><w:ind w:firstLine="0" w:left="0"/>')
+
+        def _fix_para(pm: re.Match[str]) -> str:
+            para = pm.group(0)
+            if "<w:pPr>" in para:
+                body = re.sub(r"<w:spacing [^>]*/>", "", para, count=1)
+                body = re.sub(r"<w:ind [^>]*/>", "", body, count=1)
+                # w:spacing and w:ind follow w:pStyle in EG_PPrBase order.
+                if "<w:pStyle " in body:
+                    return re.sub(r"(<w:pStyle [^>]*/>)", r"\1" + fmt, body, count=1)
+                return body.replace("<w:pPr>", f"<w:pPr>{fmt}", 1)
+            return para.replace("<w:p>", f"<w:p><w:pPr>{fmt}</w:pPr>", 1)
+
+        return _PARA_RE.sub(_fix_para, tbl)
+
+    return _TBL_RE.sub(_fix_table, xml)
+
+
+def ensure_table_style(xml: str) -> str:
+    """Define the APA 7 table style if the template does not.
+
+    APA 7 (§7.8, Table Setup): horizontal borders only, above and below the
+    header row and at the foot of the table. No vertical rules, no interior
+    horizontal rules between data rows. Table text is the body font, and APA
+    permits single spacing inside a table where it aids readability.
+    """
+    if f'w:styleId="{TABLE_STYLE_ID}"' in xml:
+        return xml
+
+    def _rule(edge: str) -> str:
+        """One APA horizontal rule: half-point, black, on the named edge."""
+        return f'<w:{edge} w:val="single" w:sz="4" w:space="0" w:color="000000"/>'
+
+    style = (
+        f'<w:style w:type="table" w:styleId="{TABLE_STYLE_ID}">'
+        f'<w:name w:val="Table"/><w:basedOn w:val="TableNormal"/><w:uiPriority w:val="59"/>'
+        f'<w:pPr><w:spacing w:after="0" w:before="0" w:line="240" w:lineRule="auto"/>'
+        f'<w:ind w:firstLine="0"/><w:jc w:val="left"/></w:pPr>'
+        f'<w:rPr><w:rFonts w:ascii="{FONT}" w:hAnsi="{FONT}" '
+        f'w:cs="{DEVANAGARI_FONT}" w:eastAsia="{FONT}"/>'
+        f'<w:sz w:val="{SIZE_HALF_POINTS}"/><w:szCs w:val="{SIZE_HALF_POINTS}"/></w:rPr>'
+        # Table-level borders: top and bottom of the table only.
+        f'<w:tblPr><w:tblBorders>'
+        f'{_rule("top")}{_rule("bottom")}'
+        f'</w:tblBorders>'
+        f'<w:tblCellMar><w:top w:w="43" w:type="dxa"/><w:left w:w="108" w:type="dxa"/>'
+        f'<w:bottom w:w="43" w:type="dxa"/><w:right w:w="108" w:type="dxa"/></w:tblCellMar>'
+        f'</w:tblPr>'
+        # The header row carries the rule beneath it, and repeats across pages.
+        f'<w:tblStylePr w:type="firstRow"><w:rPr><w:b/><w:bCs/></w:rPr>'
+        f'<w:tblPr/><w:tcPr><w:tcBorders>'
+        f'{_rule("bottom")}'
+        f'</w:tcBorders></w:tcPr></w:tblStylePr>'
+        f"</w:style>"
+    )
+    return xml.replace("</w:styles>", style + "</w:styles>")
+
+
+HEADER_PART = "word/header1.xml"
+
+_W_NS = (
+    'xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" '
+    'xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"'
+)
+
+
+def build_header(running_head: str) -> bytes:
+    """The APA 7 running head: title ALL CAPS flush left, page number flush right.
+
+    Written from scratch rather than inherited from the official APA template,
+    because Pandoc cannot copy that template without producing a package Word
+    refuses to open (it drops the template's chart, embedding and endnote parts
+    while keeping the rest). The workaround for that was a LibreOffice re-save,
+    which made Word accept the file and destroyed its tables: re-saving that
+    already-broken package returned a document with zero `w:tbl` elements whose
+    cells survived only as loose paragraphs, which is why the nine-column
+    dataset table printed as a vertical list of its own header labels.
+
+    Pandoc's own default reference document opens in Word, keeps its tables,
+    and already defines every style APA needs. The only thing it lacks is a
+    header, so this supplies one and the template is not used at all.
+
+    The page number is a `PAGE` field, so it numbers every page rather than
+    printing a literal digit.
+    """
+    return (
+        '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+        f"<w:hdr {_W_NS}>"
+        "<w:p><w:pPr><w:pStyle w:val=\"Header\"/>"
+        f'<w:tabs><w:tab w:val="right" w:pos="{RIGHT_TAB}"/></w:tabs>'
+        '<w:spacing w:after="0" w:before="0" w:line="240" w:lineRule="auto"/>'
+        '<w:ind w:firstLine="0"/><w:jc w:val="left"/></w:pPr>'
+        f"<w:r><w:rPr>{_run_props()}</w:rPr>"
+        f'<w:t xml:space="preserve">{running_head}</w:t></w:r>'
+        "<w:r><w:tab/></w:r>"
+        f'<w:r><w:rPr>{_run_props()}</w:rPr>'
+        '<w:fldChar w:fldCharType="begin"/></w:r>'
+        f'<w:r><w:rPr>{_run_props()}</w:rPr>'
+        '<w:instrText xml:space="preserve"> PAGE </w:instrText></w:r>'
+        f'<w:r><w:rPr>{_run_props()}</w:rPr>'
+        '<w:fldChar w:fldCharType="end"/></w:r>'
+        "</w:p></w:hdr>"
+    ).encode("utf-8")
 
 
 def fix_header(xml: str, running_head: str) -> tuple[str, list[str]]:
@@ -221,6 +488,167 @@ def fix_content_types(xml: str, extensions: set[str]) -> tuple[str, list[str]]:
     return xml, changes
 
 
+_PARA_RE = re.compile(r"<w:p(?: [^>]*)?>.*?</w:p>", re.DOTALL)
+
+_DEVANAGARI = re.compile(r"[ऀ-ॿ꣠-ꣿ]")
+"""Devanagari, plus the Vedic extensions block.
+
+Matching the script rather than a word list: the project's standing rule is
+that a check against Nepali matches the writing system or the ending, never an
+enumerated set of examples.
+"""
+
+_RUN_RE = re.compile(r"<w:r(?: [^>]*)?>.*?</w:r>", re.DOTALL)
+_TEXT_RE = re.compile(r"<w:t(?: [^>]*)?>(.*?)</w:t>", re.DOTALL)
+
+
+def font_devanagari_runs(xml: str) -> tuple[str, list[str]]:
+    """Give every run containing Devanagari a font that can draw it.
+
+    `w:cs` is **not** sufficient on its own. Word consults the complex-script
+    face only for runs it has decided are complex script; a Devanagari run that
+    carries no such marking is drawn with `w:ascii`, which is Times New Roman,
+    which has no Devanagari glyphs. The result is a page of empty boxes in a
+    document whose styles all name a Devanagari font correctly.
+
+    Setting `w:ascii` and `w:hAnsi` on the affected runs removes the guess.
+    Latin runs are untouched, so the body stays in Times New Roman as APA
+    requires, and a run of mixed script gets the Devanagari face only if it
+    actually contains Devanagari.
+    """
+    fonts = (
+        f'<w:rFonts w:ascii="{DEVANAGARI_FONT}" w:hAnsi="{DEVANAGARI_FONT}" '
+        f'w:cs="{DEVANAGARI_FONT}"/>'
+    )
+    count = 0
+
+    def _split_mixed(run: str) -> str | None:
+        """Split a mixed-script run so only the Devanagari changes face.
+
+        Pandoc emits `The Nepal Gazette (राजपत्र) publishes ...` as one run.
+        Applying the Devanagari face to the whole run switched an entire line
+        of English out of Times New Roman, which breaks the APA body-font rule
+        while fixing the tofu. The run is therefore cut into script-homogeneous
+        pieces and only the Devanagari pieces are refaced.
+        """
+        texts = _TEXT_RE.findall(run)
+        if len(texts) != 1:
+            return None
+        text = texts[0]
+        pieces = [p for p in re.split(r"([ऀ-ॿ꣠-ꣿ]+)", text) if p]
+        if len(pieces) < 2:
+            return None
+
+        prefix = run[: run.index("<w:t")]
+        suffix = "</w:r>"
+        # Preserve xml:space so leading and trailing spaces survive the split.
+        opener = '<w:t xml:space="preserve">'
+        out: list[str] = []
+        for piece in pieces:
+            escaped = piece.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+            if _DEVANAGARI.search(piece):
+                body = prefix
+                if "<w:rPr>" in body:
+                    body = re.sub(r"<w:rFonts[^>]*/>", "", body, count=1)
+                    if "<w:rStyle " in body:
+                        body = re.sub(r"(<w:rStyle [^>]*/>)", r"\1" + fonts, body, count=1)
+                    else:
+                        body = body.replace("<w:rPr>", f"<w:rPr>{fonts}", 1)
+                else:
+                    body = re.sub(r"(<w:r(?: [^>]*)?>)", r"\1" + f"<w:rPr>{fonts}</w:rPr>",
+                                  body, count=1)
+                out.append(f"{body}{opener}{escaped}</w:t>{suffix}")
+            else:
+                out.append(f"{prefix}{opener}{escaped}</w:t>{suffix}")
+        return "".join(out)
+
+    def _fix(m: re.Match[str]) -> str:
+        nonlocal count
+        run = m.group(0)
+        if not any(_DEVANAGARI.search(t) for t in _TEXT_RE.findall(run)):
+            return run
+        if DEVANAGARI_FONT in run:
+            return run
+        count += 1
+        split = _split_mixed(run)
+        if split is not None:
+            return split
+        if "<w:rPr>" in run:
+            # EG_RPrBase order is rStyle, rFonts, b, bCs, i, iCs, ... so
+            # w:rFonts goes after an existing w:rStyle and before everything
+            # else. Inserting it at the head of w:rPr produces well-formed XML
+            # that violates the content model, and the structural checker
+            # caught exactly that on the first attempt.
+            body = re.sub(r"<w:rFonts[^>]*/>", "", run, count=1)
+            if "<w:rStyle " in body:
+                return re.sub(r"(<w:rStyle [^>]*/>)", r"\1" + fonts, body, count=1)
+            return body.replace("<w:rPr>", f"<w:rPr>{fonts}", 1)
+        return re.sub(r"(<w:r(?: [^>]*)?>)", r"\1" + f"<w:rPr>{fonts}</w:rPr>",
+                      run, count=1)
+
+    out = _RUN_RE.sub(_fix, xml)
+    return out, ([f"set a Devanagari face on {count} run(s)"] if count else [])
+
+
+def keep_figures_with_captions(xml: str) -> tuple[str, list[str]]:
+    """Stop a page break falling between a figure caption and its figure.
+
+    APA 7 puts **Figure N** and the italic title *above* the image. Word breaks
+    pages on paragraph boundaries and, left alone, stranded every caption at the
+    foot of one page with its figure overleaf: the reader meets "Figure 1" and a
+    title with nothing under it, and the figure arrives unlabelled.
+
+    `w:keepNext` binds a paragraph to the one after it, so the pair moves
+    together. It is applied to the two paragraphs preceding each drawing (the
+    label and the italic title), which is the whole caption APA specifies.
+    """
+    paragraphs = list(_PARA_RE.finditer(xml))
+    bind: set[int] = set()
+    for i, para in enumerate(paragraphs):
+        if "<w:drawing>" not in para.group(0):
+            continue
+        # The two caption paragraphs above the image: the bold "Figure N" label
+        # and the italic title. Each is bound to the paragraph that follows it,
+        # so label -> title -> image cannot be split across a page boundary.
+        # The image paragraph itself is not bound, because the Note below it may
+        # legitimately flow onto the next page.
+        for j in (i - 2, i - 1):
+            if j >= 0 and "<w:drawing>" not in paragraphs[j].group(0):
+                bind.add(j)
+
+    if not bind:
+        return xml, []
+
+    out: list[str] = []
+    last = 0
+    for i, para in enumerate(paragraphs):
+        if i not in bind:
+            continue
+        text = para.group(0)
+        if "<w:keepNext/>" in text:
+            continue
+        if "<w:pPr>" in text:
+            # ECMA-376 fixes the order of w:pPr's children: w:pStyle first,
+            # then w:keepNext. Inserting at the head of w:pPr produces
+            # well-formed XML that violates the content model, and Word reports
+            # it as one opaque "problem with the contents" naming nothing.
+            # check_docx.py catches it; this places the element correctly.
+            if "<w:pStyle " in text:
+                fixed = re.sub(r"(<w:pStyle [^>]*/>)", r"\1<w:keepNext/>", text, count=1)
+            else:
+                fixed = text.replace("<w:pPr>", "<w:pPr><w:keepNext/>", 1)
+        else:
+            # A paragraph with no properties needs the element created, and
+            # w:pPr must be the FIRST child of w:p per ECMA-376.
+            fixed = re.sub(r"(<w:p(?: [^>]*)?>)", r"\1<w:pPr><w:keepNext/></w:pPr>",
+                           text, count=1)
+        out.append(xml[last:para.start()])
+        out.append(fixed)
+        last = para.end()
+    out.append(xml[last:])
+    return "".join(out), [f"kept {len(bind)} caption/figure paragraph(s) together"]
+
+
 def fix(docx: Path, running_head: str = RUNNING_HEAD) -> list[str]:
     if len(running_head) > MAX_RUNNING_HEAD:
         raise ValueError(
@@ -238,6 +666,19 @@ def fix(docx: Path, running_head: str = RUNNING_HEAD) -> list[str]:
             if n.startswith("word/media/") and "." in n
         }
 
+    with zipfile.ZipFile(docx) as probe:
+        has_header = any(
+            re.match(r"word/header\d*\.xml$", n) for n in probe.namelist()
+        )
+        # One relationship id, shared by the three parts that must agree on it.
+        if not has_header:
+            rels_now = probe.read("word/_rels/document.xml.rels").decode("utf-8")
+            used = set(re.findall(r'Id="(rId\d+)"', rels_now))
+            i = 1
+            while f"rId{i}" in used:
+                i += 1
+            header_rid = f"rId{i}"
+
     with zipfile.ZipFile(docx) as src, zipfile.ZipFile(
         tmp, "w", zipfile.ZIP_DEFLATED
     ) as out:
@@ -245,6 +686,12 @@ def fix(docx: Path, running_head: str = RUNNING_HEAD) -> list[str]:
             data = src.read(item.filename)
             if item.filename == "[Content_Types].xml":
                 text, ct_changes = fix_content_types(data.decode("utf-8"), media_ext)
+                if not has_header and f'PartName="/{HEADER_PART}"' not in text:
+                    text = text.replace(
+                        "</Types>",
+                        f'<Override PartName="/{HEADER_PART}" ContentType='
+                        '"application/vnd.openxmlformats-officedocument.'
+                        'wordprocessingml.header+xml"/></Types>')
                 data = text.encode("utf-8")
                 changes.extend(ct_changes)
             elif item.filename == "word/styles.xml":
@@ -254,7 +701,55 @@ def fix(docx: Path, running_head: str = RUNNING_HEAD) -> list[str]:
                 text, hdr_changes = fix_header(data.decode("utf-8"), running_head)
                 data = text.encode("utf-8")
                 changes.extend(hdr_changes)
+            elif item.filename == "word/_rels/document.xml.rels" and not has_header:
+                data = data.decode("utf-8").replace(
+                    "</Relationships>",
+                    f'<Relationship Id="{header_rid}" Type="http://schemas.'
+                    'openxmlformats.org/officeDocument/2006/relationships/header"'
+                    ' Target="header1.xml"/></Relationships>').encode("utf-8")
+            elif item.filename == "word/document.xml":
+                text, keep_changes = keep_figures_with_captions(data.decode("utf-8"))
+                text, font_changes = font_devanagari_runs(text)
+                text, tbl_changes = fit_tables_to_page(text)
+                if not has_header and "<w:headerReference" not in text:
+                    # w:headerReference is the FIRST child of w:sectPr in the
+                    # CT_SectPr sequence, before w:pgSz and w:pgMar. Inserted
+                    # by slicing rather than re.sub: an earlier version lost
+                    # its group backreference in the replacement string, which
+                    # ate the <w:sectPr> tag itself and left invalid XML.
+                    ref = ('<w:headerReference w:type="default" '
+                           f'r:id="{header_rid}"/>')
+                    m = re.search(r"<w:sectPr(?: [^>]*)?>", text)
+                    if m:
+                        text = text[: m.end()] + ref + text[m.end():]
+                # APA 7 requires 1-inch margins on every side. Pandoc emits a
+                # w:sectPr carrying neither w:pgSz nor w:pgMar, so the geometry
+                # is whatever the reader's Word defaults to: correct on a US
+                # install, and A4 with different margins elsewhere. A layout
+                # that depends on the reader's locale is not a layout.
+                if "<w:pgMar" not in text:
+                    geometry = (
+                        '<w:pgSz w:w="12240" w:h="15840"/>'
+                        '<w:pgMar w:top="1440" w:right="1440" w:bottom="1440"'
+                        ' w:left="1440" w:header="720" w:footer="720"'
+                        ' w:gutter="0"/>'
+                    )
+                    sm = re.search(r"<w:sectPr(?: [^>]*)?>", text)
+                    if sm:
+                        # w:pgSz and w:pgMar follow w:headerReference in the
+                        # CT_SectPr sequence.
+                        end = text.index("</w:sectPr>", sm.end())
+                        text = text[:end] + geometry + text[end:]
+                    changes.append("declared US Letter with 1in margins")
+                data = text.encode("utf-8")
+                changes.extend(keep_changes)
+                changes.extend(font_changes)
+                changes.extend(tbl_changes)
             out.writestr(item, data)
+
+        if not has_header:
+            out.writestr(HEADER_PART, build_header(running_head))
+            changes.append(f"added a running-head part ({running_head!r})")
 
     shutil.move(str(tmp), str(docx))
     return changes

@@ -165,6 +165,29 @@ def _depth(url: str, act_slug: str) -> int:
     return len([p for p in tail.split("/") if p])
 
 
+def _canonical_slug(act_url: str, links: set[str]) -> str:
+    """The act slug the *site* uses, which is not always the one we asked for.
+
+    The site appends the Gregorian year to some slugs: a request for
+    `income-tax-act-2058` redirects to `income-tax-act-2058-2002`. The
+    requested slug is a **prefix** of the real one, so a naive
+    `f"/Laws/{slug}" in u` filter keeps the chapter links and the walk looks
+    healthy right up until it returns zero provisions - reported, before this
+    fix, as a clean `UNKNOWN` density for two Acts.
+
+    So the slug is read back from the links the site actually served. The
+    longest slug that the requested one is a prefix of wins; ties and misses
+    fall back to the requested slug, which keeps single-edition Acts unchanged.
+    """
+    asked = act_url.rstrip("/").split("/Laws/")[-1].split("/")[0]
+    served = {u.split("/Laws/")[-1].split("/")[0] for u in links if "/Laws/" in u}
+    matches = sorted(
+        (s for s in served if s == asked or s.startswith(f"{asked}-")),
+        key=len,
+    )
+    return matches[-1] if matches else asked
+
+
 def discover_provisions(act_url: str) -> list[str]:
     """Provision URLs for one act, via its own table of contents.
 
@@ -173,8 +196,9 @@ def discover_provisions(act_url: str) -> list[str]:
     sections for this act and 0 for another, and a short list here is
     indistinguishable from an act that really is short.
     """
-    act_slug = act_url.rstrip("/").split("/Laws/")[-1].split("/")[0]
-    top = {u for u in _links_on(act_url) if f"/Laws/{act_slug}" in u}
+    top_links = _links_on(act_url)
+    act_slug = _canonical_slug(act_url, top_links)
+    top = {u for u in top_links if f"/Laws/{act_slug}/" in u + "/"}
 
     # Acts come in two shapes. Most nest provisions under chapters
     # (act/chapter-N/section-M, depth 2); older short Acts such as the Bonus
@@ -215,6 +239,16 @@ def _cached_discover(act_url: str, cache_dir: Path | None) -> list[str]:
     if index.exists():
         return json.loads(index.read_text(encoding="utf-8"))
     urls = discover_provisions(act_url)
+    if not urls:
+        # A zero-provision discovery is a failure, not a fact about the Act, and
+        # caching it makes the failure permanent and free to repeat. Two Acts
+        # were probed as empty this way (a slug the site had renamed) and the
+        # wrong answer was written to disk, where a later run would have trusted
+        # it without spending a call to notice.
+        raise HarvestError(
+            f"discovery found no provisions for {act_url}; refusing to cache "
+            "an empty result - check the act slug the site actually serves"
+        )
     cache_dir.mkdir(parents=True, exist_ok=True)
     index.write_text(json.dumps(urls, indent=1), encoding="utf-8")
     return urls

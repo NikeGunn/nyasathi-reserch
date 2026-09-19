@@ -108,8 +108,27 @@ def main(argv: list[str] | None = None) -> int:
 
     out = args.out
     if out.exists():
-        shutil.rmtree(out)
-    out.mkdir(parents=True)
+        # Clear the CONTENTS, never the directory itself. The release folder is
+        # a git repository with its own remote, and rmtree on it deletes the
+        # history along with the files: on Windows it fails partway through with
+        # a PermissionError on a packed object, leaving a half-deleted .git that
+        # is worse than either outcome.
+        # Files this script does not generate but the release needs. Clearing
+        # them leaves a published repository with no licence and no README
+        # until someone notices, and `git status` shows the deletion among a
+        # hundred other staged changes.
+        keep = {
+            ".git", ".gitignore", "LICENSE", "README.md", "CITATION.cff",
+            "NEPVERSA_manuscript_draft.pdf",
+        }
+        for child in out.iterdir():
+            if child.name in keep:
+                continue
+            if child.is_dir():
+                shutil.rmtree(child)
+            else:
+                child.unlink()
+    out.mkdir(parents=True, exist_ok=True)
 
     corpus_fn = (lambda r: r) if args.include_text else redact_corpus_row
     item_fn = (lambda r: r) if args.include_text else redact_item

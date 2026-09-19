@@ -45,7 +45,7 @@ item traces to a specific sentence in the law.
 corpus/       provision records with amendment provenance (see Licensing)
 benchmark/    NEPVERSA items with deterministic gold
 src/nepversa/ the extraction pipeline
-tests/        87 tests, every safety check mutation-tested
+tests/        153 tests, every safety check mutation-tested
 analysis/     table generation, release building, APA post-processing
 logs/         provenance, verified citations, literature notes
 ```
