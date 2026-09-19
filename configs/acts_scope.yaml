@@ -1,0 +1,86 @@
+# NEPVERSA act scope — which Acts the corpus covers, and why.
+#
+# PAPER_PLAN.md §6 item 2 asks for 10-20 acts amended several times.
+# Selection is ordered by AMENDMENT DENSITY, not by size: an act with no
+# amendment footnotes contributes provisions but no T2/T3 items, which are
+# the paper's whole point.
+#
+# Acts are harvested in BOTH editions where available. The Nepali edition is
+# primary (the paper is about Nepali law); the English edition gives a free
+# gloss for figures, which PAPER_PLAN.md §15.3 requires beside Devanagari.
+
+source: nepallaws.com
+retrieved_window: "2026-09-19 onwards"
+acts_listed_on_site: 59   # 29 Nepali + 30 English, counted 2026-09-19
+
+tier_1_confirmed:
+  # Harvested and verified this session.
+  - slug_en: banking-offence-and-punishment-act-2064
+    slug_ne: "बैङ्किङ्ग-कसूर-तथा-सजाय-ऐन-२०६४"
+    name_ne: "बैङ्किङ्ग कसूर तथा सजाय ऐन, २०६४"
+    sections: 34
+    amendment_density: "8/34 sections carry footnotes (24%)"
+    lettered_sections: ["12A", "14A", "14B", "19B"]   # inserted by amendment
+    why: >
+      Measured 24% amendment density and four amendment-inserted sections.
+      Also the product's best-resolved act (255/255 citations), so T4
+      statute-to-case linkage is already possible here.
+    status: harvested
+
+tier_1_candidates:
+  # Old acts, many amendments expected. Verify density before committing.
+  - slug_en: income-tax-act-2058
+    name_ne: "आयकर ऐन, २०५८"
+    why: "BS 2058 (2001), 24 chapters, amended by most annual Finance Acts."
+  - slug_en: companies-act-2063
+    name_ne: "कम्पनी ऐन, २०६३"
+    why: "BS 2063 (2006); major amendments in 2074."
+  - slug_en: value-added-tax-act-2052
+    name_ne: "मूल्य अभिवृद्धि कर ऐन, २०५२"
+    why: "BS 2052 (1995) — the oldest tax act on the site; heavily amended."
+  - slug_en: public-procurement-act-2063
+    name_ne: "सार्वजनिक खरिद ऐन, २०६३"
+    why: "Amended repeatedly; the product records 83 provisions on site."
+  - slug_en: nepal-rastra-bank-act-2058
+    name_ne: "नेपाल राष्ट्र बैङ्क ऐन, २०५८"
+    why: "Central bank act, amended alongside BAFIA."
+  - slug_en: bonus-act-2030
+    name_ne: "बोनस ऐन, २०३०"
+    why: "BS 2030 (1973) — oldest act listed; longest amendment history."
+  - slug_en: foreign-exchange-regulation-act-2019
+    name_ne: "विदेशी विनिमय (नियमित गर्ने) ऐन, २०१९"
+    why: "BS 2019 (1962). Predates every other act on the site."
+
+tier_2_structural:
+  # Large and central, lower expected amendment density. Needed for T1/T5.
+  - slug_en: the-national-civil-code-act-2074
+    name_ne: "मुलुकी देवानी संहिता, २०७४"
+    sections: 721
+    why: "The Civil Code. Already partly in the product corpus (217/721)."
+  - slug_en: the-national-penal-code-act-2074
+    name_ne: "मुलुकी अपराध संहिता, २०७४"
+    why: >
+      The Penal Code. Recorded as UNAVAILABLE in docs/need-docs.md;
+      present on the site as of 2026-09-19. Closes a Tier-1 gap.
+  - slug_en: constitution-of-nepal-2072
+    name_ne: "नेपालको संविधान, २०७२"
+    sections: 312
+    why: "Constitutional articles; amended twice since 2072."
+  - slug_en: labour-act-2074
+    name_ne: "श्रम ऐन, २०७४"
+  - slug_en: cooperatives-act-2074
+    name_ne: "सहकारी ऐन, २०७४"
+  - slug_en: insurance-act-2079
+    name_ne: "बीमा ऐन, २०७९"
+
+# Selection rule, applied AFTER a density probe of each candidate:
+#   keep an act when it has >= 3 amended units OR >= 1 lettered section.
+# An act that fails both is harvested for T1/T5 only and is reported as such
+# in the dataset table. Acts are never dropped silently: every probed act
+# appears in the statistics with its measured density, including zeros.
+selection_rule:
+  min_amended_units: 3
+  or_min_lettered_sections: 1
+  note: >
+    Report every probed act including the rejects. A scope chosen by an
+    unreported filter is a scope nobody can reproduce.

@@ -1,0 +1,20 @@
+cff-version: 1.2.0
+title: "NEPVERSA: A Version-Aware Nepali Statutory Retrieval Benchmark"
+message: "If you use this resource, please cite it as below."
+type: dataset
+authors:
+  - family-names: Bhagat
+    given-names: Nikhil
+    orcid: "https://orcid.org/0009-0008-9603-8746"
+    affiliation: "Independent Researcher, Nepal"
+    email: programmer@nikhilbhagat.com.np
+repository-code: "https://github.com/NikeGunn/nyasathi-reserch"
+keywords:
+  - legal information retrieval
+  - low-resource languages
+  - Nepali
+  - temporal reasoning
+  - benchmark construction
+  - retrieval-augmented generation
+license: MIT
+date-released: 2026-09-19

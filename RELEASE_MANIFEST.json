@@ -1,0 +1,6 @@
+{
+  "statutory_text_included": false,
+  "provisions": 109,
+  "benchmark_items": 46,
+  "redaction": "text replaced by sha256 + length; rebuild with src/nepversa/harvest.py"
+}

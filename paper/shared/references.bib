@@ -1,0 +1,220 @@
+% references.bib — NEPVERSA
+% RULE 3: every entry verified against the arXiv API or Crossref, with the
+% verification recorded in logs/citations_verified.md. Unverifiable -> removed.
+% Verified 2026-09-19 via export.arxiv.org/api/query (non-urllib User-Agent).
+% Author lists below are copied from the API response, not from memory.
+
+% ============================================================
+% Temporal / version-aware legal retrieval  (the direct competitors)
+% ============================================================
+
+@article{sobhani2026tide,
+  title        = {Time Present and Time Past: Benchmarking Large Language Models on Temporally Evolving Document Understanding},
+  author       = {Sobhani, Mahbub E and Sayeedi, Md. Faiyaz Abdullah and Chowdhury, Fahmid Hasan and Arefeen, Md Adnan and Sadeque, Farig and Bari, Md. Faizul},
+  year         = {2026},
+  journal      = {arXiv preprint arXiv:2608.08512},
+  eprint       = {2608.08512},
+  archivePrefix= {arXiv},
+  primaryClass = {cs.CL},
+  doi          = {10.48550/arXiv.2608.08512},
+  url          = {https://doi.org/10.48550/arXiv.2608.08512},
+  note         = {TIDE: 3,050 QA pairs, 644 Bangladeshi customs instruments 1969--2025; version resolution; dual calendars; code-mixed}
+}
+
+@article{cymbler2026fiscalqa,
+  title        = {Temporal Misgrounding in Legal {RAG}: A Versioned-Corpus Benchmark for French Tax Law},
+  author       = {Cymbler, Rose and Guez, Daniel and Fabre, Laurent},
+  year         = {2026},
+  journal      = {arXiv preprint arXiv:2608.09393},
+  eprint       = {2608.09393},
+  archivePrefix= {arXiv},
+  primaryClass = {cs.CL},
+  doi          = {10.48550/arXiv.2608.09393},
+  url          = {https://doi.org/10.48550/arXiv.2608.09393},
+  note         = {FiscalQA Pro: 32,436 article-versions 1938--2031; deterministic nugget scoring, no LLM judge}
+}
+
+@article{prior2026asking,
+  title        = {Asking For An Old Friend: Diagnosing and Mitigating Temporal Failure Modes in {LLM}-based Statutory Question Answering},
+  author       = {Prior, Max and Schultz, Andreas and Grabmair, Matthias},
+  year         = {2026},
+  journal      = {arXiv preprint arXiv:2605.23497},
+  eprint       = {2605.23497},
+  archivePrefix= {arXiv},
+  primaryClass = {cs.CL},
+  doi          = {10.48550/arXiv.2605.23497},
+  url          = {https://doi.org/10.48550/arXiv.2605.23497},
+  note         = {312 expert-validated German statutory QA pairs; post-cutoff staleness and recency bias}
+}
+
+@article{fan2026timetravel,
+  title        = {Can {LLM}s Time Travel? Enhancing Temporal Consistency in Legal Agentic Search through Reinforcement Learning},
+  author       = {Fan, Wei and Zhou, Yining and Zhang, Mufan and Weng, Yanbing and Hu, Yiran and Zheng, Tianshi},
+  year         = {2026},
+  journal      = {arXiv preprint arXiv:2605.25920},
+  eprint       = {2605.25920},
+  archivePrefix= {arXiv},
+  primaryClass = {cs.CL},
+  doi          = {10.48550/arXiv.2605.25920},
+  url          = {https://doi.org/10.48550/arXiv.2605.25920},
+  note         = {LegalSearch-R1; temporally-indexed training across amendment periods}
+}
+
+% ============================================================
+% Nepali legal NLP  (the gap NEPVERSA fills)
+% ============================================================
+
+@article{wagle2026nepali,
+  title        = {Retrieval Augmented Generation Framework for the Nepali Legal Domain Question Answering},
+  author       = {Wagle, Samir and Adhikari, Abiral and Khanal, Reewaj and Bhandari, Batsal and Manandhar, Prashant and Acharya, Praveen and Bal, Bal Krishna},
+  year         = {2026},
+  journal      = {arXiv preprint arXiv:2606.07523},
+  eprint       = {2606.07523},
+  archivePrefix= {arXiv},
+  primaryClass = {cs.CL},
+  doi          = {10.48550/arXiv.2606.07523},
+  url          = {https://doi.org/10.48550/arXiv.2606.07523},
+  note         = {First Nepali legal RAG; NKP case law only; BM25 P@1 0.91 > multilingual-E5-large 0.75; no statutes, no versioning}
+}
+
+@article{thapa2026nepkanun,
+  title        = {{NepKANUN}: A {RAG}-Based Nepali Legal Assistant},
+  author       = {Thapa, Bhabuk and Koirala, Prasiddha and Raut, Ranjit and Regmi, Sunil and Bal, Bal Krishna},
+  year         = {2026},
+  journal      = {arXiv preprint arXiv:2609.15999},
+  eprint       = {2609.15999},
+  archivePrefix= {arXiv},
+  primaryClass = {cs.CL},
+  doi          = {10.48550/arXiv.2609.15999},
+  url          = {https://doi.org/10.48550/arXiv.2609.15999},
+  note         = {Fine-tuned LLM + RAG assistant; BERTScore F1 0.82/0.77/0.71; no amendment or temporal dimension}
+}
+
+% ============================================================
+% Adaptive / agentic retrieval  (System 2 methods)
+% ============================================================
+
+@inproceedings{lewis2020rag,
+  title     = {Retrieval-Augmented Generation for Knowledge-Intensive {NLP} Tasks},
+  author    = {Lewis, Patrick and Perez, Ethan and Piktus, Aleksandra and Petroni, Fabio and Karpukhin, Vladimir and Goyal, Naman and K{\"u}ttler, Heinrich and Lewis, Mike and Yih, Wen-tau and Rockt{\"a}schel, Tim and Riedel, Sebastian and Kiela, Douwe},
+  year      = {2020},
+  booktitle = {Advances in Neural Information Processing Systems},
+  volume    = {33},
+  eprint    = {2005.11401},
+  archivePrefix = {arXiv},
+  doi       = {10.48550/arXiv.2005.11401},
+  url       = {https://doi.org/10.48550/arXiv.2005.11401}
+}
+
+@inproceedings{trivedi2023ircot,
+  title     = {Interleaving Retrieval with Chain-of-Thought Reasoning for Knowledge-Intensive Multi-Step Questions},
+  author    = {Trivedi, Harsh and Balasubramanian, Niranjan and Khot, Tushar and Sabharwal, Ashish},
+  year      = {2023},
+  booktitle = {Proceedings of the 61st Annual Meeting of the Association for Computational Linguistics},
+  eprint    = {2212.10509},
+  archivePrefix = {arXiv},
+  doi       = {10.48550/arXiv.2212.10509},
+  url       = {https://doi.org/10.48550/arXiv.2212.10509},
+  note      = {IRCoT}
+}
+
+@inproceedings{jiang2023flare,
+  title     = {Active Retrieval Augmented Generation},
+  author    = {Jiang, Zhengbao and Xu, Frank F. and Gao, Luyu and Sun, Zhiqing and Liu, Qian and Dwivedi-Yu, Jane and Yang, Yiming and Callan, Jamie and Neubig, Graham},
+  year      = {2023},
+  booktitle = {Proceedings of the 2023 Conference on Empirical Methods in Natural Language Processing},
+  eprint    = {2305.06983},
+  archivePrefix = {arXiv},
+  doi       = {10.48550/arXiv.2305.06983},
+  url       = {https://doi.org/10.48550/arXiv.2305.06983},
+  note      = {FLARE}
+}
+
+@inproceedings{jeong2024adaptiverag,
+  title     = {Adaptive-{RAG}: Learning to Adapt Retrieval-Augmented Large Language Models through Question Complexity},
+  author    = {Jeong, Soyeong and Baek, Jinheon and Cho, Sukmin and Hwang, Sung Ju and Park, Jong C.},
+  year      = {2024},
+  booktitle = {Proceedings of the 2024 Conference of the North American Chapter of the Association for Computational Linguistics},
+  eprint    = {2403.14403},
+  archivePrefix = {arXiv},
+  doi       = {10.48550/arXiv.2403.14403},
+  url       = {https://doi.org/10.48550/arXiv.2403.14403}
+}
+
+@inproceedings{yao2023react,
+  title     = {{ReAct}: Synergizing Reasoning and Acting in Language Models},
+  author    = {Yao, Shunyu and Zhao, Jeffrey and Yu, Dian and Du, Nan and Shafran, Izhak and Narasimhan, Karthik and Cao, Yuan},
+  year      = {2023},
+  booktitle = {International Conference on Learning Representations},
+  eprint    = {2210.03629},
+  archivePrefix = {arXiv},
+  doi       = {10.48550/arXiv.2210.03629},
+  url       = {https://doi.org/10.48550/arXiv.2210.03629}
+}
+
+@article{jin2025searchr1,
+  title        = {Search-{R1}: Training {LLM}s to Reason and Leverage Search Engines with Reinforcement Learning},
+  author       = {Jin, Bowen and Zeng, Hansi and Yue, Zhenrui and Yoon, Jinsung and Arik, Sercan and Wang, Dong and Zamani, Hamed and Han, Jiawei},
+  year         = {2025},
+  journal      = {arXiv preprint arXiv:2503.09516},
+  eprint       = {2503.09516},
+  archivePrefix= {arXiv},
+  primaryClass = {cs.CL},
+  doi          = {10.48550/arXiv.2503.09516},
+  url          = {https://doi.org/10.48550/arXiv.2503.09516}
+}
+
+% ============================================================
+% Tools (APA §9.5 requires the AI tool to be cited)
+% ============================================================
+
+@misc{anthropic2026claude,
+  title        = {Claude},
+  author       = {{Anthropic}},
+  year         = {2026},
+  howpublished = {Large language model},
+  url          = {https://claude.ai},
+  note         = {Used for literature discovery, code assistance, and drafting; see Method, Use of Generative AI Tools}
+}
+
+% ============================================================
+% PENDING VERIFICATION — not yet usable (Rule 3)
+% ------------------------------------------------------------
+% Surfaced via Consensus but NOT yet confirmed against arXiv/Crossref.
+% Do not cite until moved above and logged in citations_verified.md.
+%
+%   Acharya et al. (2026) "Towards Building a Standard Benchmark for
+%       Low-Resource Nepali Information Retrieval", SIGIR 2026.
+%       -> 0 arXiv hits; verify via ACM DL / SIGIR proceedings.
+%   de Martim, Hudson (2025) SAT-Graph RAG; LRMoo diachronic modelling.
+%       -> verify each of the four papers separately.
+%   Manoharan et al. (2026) "Apofasi", IEEE ISCAIE 2026. -> verify via IEEE.
+%   Dhakal et al. (2025) ICAIL 2025. -> verify via ACM DL.
+%   Zheng et al. (2025) "A Reasoning-Focused Legal Retrieval Benchmark",
+%       CS&Law 2025. -> verify via ACM DL.
+%   Poudel et al. (2024) English-Nepali legal MT, LREC-COLING SIGUL 2024.
+%   Faisal et al. (2024) LEGAL-UQA.  Rakhimova et al. (2025) Kazakh legal QA.
+%   Begha et al. (2026) Nepali passport QA.
+% ============================================================
+
+@article{faisal2024legaluqa,
+  title        = {{LEGAL-UQA}: A Low-Resource {Urdu}-{English} Dataset for Legal Question Answering},
+  author       = {Faisal, Faizan and Yousaf, Umair},
+  year         = {2024},
+  journal      = {arXiv preprint arXiv:2410.13013},
+  eprint       = {2410.13013},
+  archivePrefix= {arXiv},
+  primaryClass = {cs.CL},
+  doi          = {10.48550/arXiv.2410.13013},
+  url          = {https://doi.org/10.48550/arXiv.2410.13013}
+}
+
+@inproceedings{acharya2026nepali,
+  title     = {Towards Building a Standard Benchmark for Low-Resource {Nepali} Information Retrieval},
+  author    = {Acharya, Praveen and Bal, Bal Krishna},
+  year      = {2026},
+  booktitle = {Proceedings of the 49th International ACM SIGIR Conference on Research and Development in Information Retrieval},
+  publisher = {ACM},
+  doi       = {10.1145/3805712.3808533},
+  url       = {https://doi.org/10.1145/3805712.3808533}
+}

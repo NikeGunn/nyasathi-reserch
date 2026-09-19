@@ -1,0 +1,64 @@
+{
+  "corpus": {
+    "acts": 3,
+    "provisions": 109,
+    "amended_provisions": 10,
+    "amended_pct": 9.2,
+    "lettered_sections": 27,
+    "repealed_in_full": 7,
+    "amendment_units": 28,
+    "op_insert": 8,
+    "op_substitute": 16,
+    "op_repeal": 4
+  },
+  "per_act": [
+    {
+      "act": "banking-offence-and-punishment-act-2064",
+      "provisions": 34,
+      "amended": 6,
+      "amended_pct": 17.6,
+      "lettered": 5,
+      "repealed_in_full": 1,
+      "insert": 6,
+      "substitute": 13,
+      "repeal": 2,
+      "units_total": 21
+    },
+    {
+      "act": "bonus-act-2030",
+      "provisions": 29,
+      "amended": 1,
+      "amended_pct": 3.4,
+      "lettered": 1,
+      "repealed_in_full": 5,
+      "insert": 1,
+      "substitute": 2,
+      "repeal": 0,
+      "units_total": 3
+    },
+    {
+      "act": "foreign-exchange-regulation-act-2019",
+      "provisions": 46,
+      "amended": 3,
+      "amended_pct": 6.5,
+      "lettered": 21,
+      "repealed_in_full": 1,
+      "insert": 1,
+      "substitute": 1,
+      "repeal": 2,
+      "units_total": 4
+    }
+  ],
+  "benchmark": {
+    "items": 46,
+    "acts_covered": 3,
+    "t2_point_in_time": 36,
+    "t3_supersession": 10,
+    "abstention_expected": 22,
+    "abstention_pct": 47.8,
+    "nugget_label": 22,
+    "nugget_citation": 24,
+    "nugget_exact": 24,
+    "status_unverified": 46
+  }
+}
