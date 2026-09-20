@@ -50,7 +50,11 @@ analysis/     table generation, release building, APA post-processing
 logs/         provenance, verified citations, literature notes
 ```
 
-## Current release
+## Current release — v1.0.0
+
+Versioning is defined in [`VERSIONING.md`](VERSIONING.md). For a dataset,
+**MAJOR means a published number may change**, so an item edit bumps the major
+version even when no code does. Cite the tag, never `main`.
 
 | | |
 |---|---|
@@ -69,8 +73,15 @@ logs/         provenance, verified citations, literature notes
 | Bonus Act, 2030 | 29 | 1 | 1 | 5 |
 | Foreign Exchange (Regulation) Act, 2019 | 46 | 3 | 21 | 1 |
 
-Every item is `status=unverified` pending human audit. See
-`benchmark/guidelines.md` for the audit protocol.
+**Every item is `status=unverified`. No human legal audit has been performed**,
+so there is no error rate and no inter-annotator agreement: those numbers do
+not exist. The version number is not a quality claim; read
+`RELEASE_MANIFEST.json`, whose `items_verified_by_human` field is currently 0.
+
+Closing that gap is the contribution this project needs most, and it needs a
+qualified legal reader. The protocol is in
+[`AUDIT_human_verification_required.md`](AUDIT_human_verification_required.md);
+if you can help, see [`CONTRIBUTING.md`](CONTRIBUTING.md).
 
 ## Reproducing
 
@@ -163,10 +174,30 @@ Three things made the failures visible, and they are built into this pipeline:
 been peer reviewed and its findings concern extraction correctness, not model
 capability.
 
+## Contributing
+
+See [`CONTRIBUTING.md`](CONTRIBUTING.md). The most valuable contributions are a
+legal audit of the benchmark items, an Act whose footnotes the parser misreads,
+and a failure to reproduce a reported number.
+
+Three rules are enforced by CI rather than trusted: no statutory text in the
+release, a version consistent across the manifest and the citation, and **no
+item marked `verified` beyond the number the manifest records as audited**.
+
 ## Citation
 
-A manuscript describing this resource is in preparation. Until it appears,
-please cite the repository (see `CITATION.cff`).
+A manuscript describing this resource is in preparation. Until it appears, cite
+the repository at the version you used — `main` moves, and a reader who follows
+it later gets a different corpus from the one whose numbers they are checking.
+
+```
+Bhagat, N. (2026). NEPVERSA: A version-aware Nepali statutory retrieval
+benchmark (Version 1.0.0) [Data set]. GitHub.
+https://github.com/NikeGunn/nyasathi-reserch/releases/tag/v1.0.0
+```
+
+See `CITATION.cff`, whose version field is generated from `VERSION` so it
+cannot drift from the tag.
 
 ## Contact
 

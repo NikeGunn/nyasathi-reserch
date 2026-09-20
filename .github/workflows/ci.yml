@@ -1,0 +1,108 @@
+name: tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Run the test suite
+        # PYTHONUTF8 is set on every platform, not only Windows. The suite
+        # carries Devanagari fixtures, and a runner whose default encoding is
+        # not UTF-8 mangles them into a failure that looks like a code defect.
+        env:
+          PYTHONUTF8: "1"
+          PYTHONPATH: src
+        run: python -m pytest tests -q
+
+      - name: The release must carry no statutory text
+        # The licence status of the source is unresolved, so the bundle ships
+        # hashes and offsets rather than text. This is the one check whose
+        # failure is a licensing problem rather than a bug, so it runs on every
+        # push regardless of what the PR claims to touch.
+        run: |
+          python - <<'PY'
+          import json, re, sys
+          from pathlib import Path
+
+          devanagari = re.compile(r"[ऀ-ॿ]")
+          leaks = []
+          for f in Path("corpus").glob("*.jsonl"):
+              for n, line in enumerate(f.read_text(encoding="utf-8").splitlines(), 1):
+                  if not line.strip():
+                      continue
+                  row = json.loads(line)
+                  text = row.get("text")
+                  if isinstance(text, str) and len(text) > 40:
+                      if devanagari.search(text) or text.count(" ") > 8:
+                          leaks.append(f"{f}:{n}")
+          if leaks:
+              print("Statutory text present in the release:", *leaks, sep="\n  ")
+              sys.exit(1)
+          print("No statutory text in the release bundle.")
+          PY
+
+      - name: The version must be well formed and match the manifest
+        run: |
+          python - <<'PY'
+          import json, re, sys
+          from pathlib import Path
+
+          manifest = json.loads(Path("RELEASE_MANIFEST.json").read_text(encoding="utf-8"))
+          version = manifest.get("version", "")
+          if not re.fullmatch(r"\d+\.\d+\.\d+", version):
+              sys.exit(f"RELEASE_MANIFEST.json version is {version!r}; see VERSIONING.md")
+
+          cff = Path("CITATION.cff").read_text(encoding="utf-8")
+          m = re.search(r"^version:\s*(\S+)", cff, re.M)
+          if not m:
+              sys.exit("CITATION.cff has no version field")
+          if m.group(1) != version:
+              sys.exit(
+                  f"CITATION.cff says {m.group(1)}, manifest says {version}. "
+                  "Both are generated from VERSION by analysis/make_release.py; "
+                  "a citation that disagrees with its tag is uncitable."
+              )
+          print(f"Version {version} is consistent across manifest and citation.")
+          PY
+
+      - name: An item may not claim verification that did not happen
+        # The manifest records how many items a qualified human has audited.
+        # If that count is zero, no item may carry status=verified. This is the
+        # project's central scientific rule, so it is enforced rather than
+        # trusted: the manuscript once described an audit that never occurred.
+        run: |
+          python - <<'PY'
+          import json, sys
+          from pathlib import Path
+
+          manifest = json.loads(Path("RELEASE_MANIFEST.json").read_text(encoding="utf-8"))
+          audited = manifest.get("items_verified_by_human", 0)
+
+          verified = []
+          for f in Path("benchmark").glob("*.jsonl"):
+              for n, line in enumerate(f.read_text(encoding="utf-8").splitlines(), 1):
+                  if not line.strip():
+                      continue
+                  if json.loads(line).get("status") == "verified":
+                      verified.append(f"{f}:{n}")
+
+          if verified and audited == 0:
+              print(
+                  "Items are marked verified but the manifest records no human "
+                  "audit:", *verified, sep="\n  ",
+              )
+              sys.exit(1)
+          if len(verified) > audited:
+              sys.exit(f"{len(verified)} items verified, manifest records {audited} audited")
+          print(f"{len(verified)} verified item(s), {audited} recorded as audited.")
+          PY

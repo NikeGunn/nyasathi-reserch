@@ -17,4 +17,5 @@ keywords:
   - benchmark construction
   - retrieval-augmented generation
 license: MIT
-date-released: 2026-09-19
+version: 1.0.0
+date-released: 2026-09-20
