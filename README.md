@@ -3,6 +3,8 @@
 **A version-aware Nepali statutory retrieval benchmark derived from amendment
 footnotes.**
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.22916911.svg)](https://doi.org/10.5281/zenodo.22916911)
+
 Nikhil Bhagat · Independent Researcher, Nepal ·
 [ORCID 0009-0008-9603-8746](https://orcid.org/0009-0008-9603-8746)
 
@@ -175,7 +177,7 @@ Three things made the failures visible, and they are built into this pipeline:
 ## Manuscript
 
 [`NEPVERSA_preprint.pdf`](NEPVERSA_preprint.pdf) is the preprint matching this
-release. It has not been peer reviewed; its findings concern extraction
+release, archived at https://doi.org/10.5281/zenodo.22916911. It has not been peer reviewed; its findings concern extraction
 correctness, not model capability.
 
 ## Contributing
@@ -192,9 +194,18 @@ item marked `verified` beyond the number the manifest records as audited**.
 
 Cite the version you used — `main` moves.
 
+Paper (preprint):
+
 ```
 Bhagat, N. (2026). NEPVERSA: A version-aware Nepali statutory retrieval
-benchmark derived from amendment footnotes (Version 2.0.0) [Data set].
+benchmark derived from amendment footnotes (Version 2.0.0) [Preprint].
+Zenodo. https://doi.org/10.5281/zenodo.22916911
+```
+
+Code and data:
+
+```
+Bhagat, N. (2026). NEPVERSA (Version 2.0.0) [Data set]. GitHub.
 https://github.com/NikeGunn/nyasathi-reserch/releases/tag/v2.0.0
 ```
 
