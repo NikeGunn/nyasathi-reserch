@@ -54,6 +54,13 @@ substitution, or repeal) at clause granularity. Gold answers are therefore
 *derived from published statements* rather than authored, and every benchmark
 item traces to a specific sentence in the law.
 
+## Status
+
+- **Preprint:** https://doi.org/10.5281/zenodo.22916911 (not peer reviewed)
+- **Journal:** under review at ACM Transactions on Asian and Low-Resource
+  Language Information Processing (TALLIP), submitted 2026-09-23
+- **arXiv:** pending
+
 ## Contents
 
 ```
