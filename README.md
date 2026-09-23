@@ -8,6 +8,19 @@ Nikhil Bhagat · Independent Researcher, Nepal ·
 
 ---
 
+> **Reviewers: reproduce in three commands** (Python 3.12, ~2 minutes, no API key)
+>
+> ```bash
+> git clone https://github.com/NikeGunn/nyasathi-reserch && cd nyasathi-reserch && git checkout v2.0.0
+> pip install pytest matplotlib defusedxml
+> PYTHONUTF8=1 PYTHONPATH=src python -m pytest tests -q     # expect: 216 passed
+> ```
+>
+> Every number in the paper is in `paper/shared/numbers.json`, produced by
+> `analysis/make_tables.py`. Rebuilding the corpus itself from the live source
+> needs a Firecrawl key and about an hour: see [`REPRODUCE.md`](REPRODUCE.md),
+> which lists every step and the expected value of every number.
+
 ## What this is
 
 When a legislature amends an Act, the earlier text remains the correct law for
