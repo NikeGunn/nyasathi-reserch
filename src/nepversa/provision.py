@@ -27,6 +27,7 @@ from .amendments import (
     inserted_by_numbering,
     normalize,
     parse_footnotes,
+    sup_markers,
 )
 
 # The provision heading, e.g. `# Section 7: Not to avail or provide loans ...`
@@ -42,6 +43,27 @@ _HEADING_RE = re.compile(
 )
 
 _TAGGED_RE = re.compile(r"^\s*[-*]?\s*Tagged\s*:", re.IGNORECASE)
+
+_SHARE_RE = re.compile(r"^\s*\[Share this Law\]", re.IGNORECASE)
+"""The other end-of-provision marker the site emits.
+
+A page carries `- Tagged:` only when the provision has tags. Acts whose
+provisions are untagged end the body at the "Share this Law" link instead, and
+requiring the tag list rejected **every** provision of such an Act: 96 of 96
+pages across the Income Tax Act 2058 and the Companies Act 2063, each one
+carrying clean, complete statutory text.
+
+The failure was silent in the way this project keeps meeting. The harvester
+reported transport success, the pages cached correctly, and the parse rejection
+count was the only place the loss appeared. A density probe had already
+declared both Acts KEEP on their section numbering, so the corpus would have
+grown by two Acts and zero provisions.
+
+Either marker terminates the body. Both are page furniture that follows the
+provision, so whichever appears first is the boundary.
+"""
+
+_END_MARKERS = (_TAGGED_RE, _SHARE_RE)
 
 # Page chrome that must never survive into a stored provision. Any hit makes
 # the row invalid: the validation gate fails loudly instead of storing dirt.
@@ -107,6 +129,14 @@ class Provision:
     footnotes: dict[str, Footnote] = field(default_factory=dict)
     amended_units: tuple[AmendedUnit, ...] = ()
 
+    inline_marker_count: int | None = None
+    """How many inline `<sup>N</sup>` markers the page HTML carries; `None`
+    without HTML. The validator's ground truth for "markers but no units"."""
+
+    marker_source: str = "markdown"
+    """Where inline amendment markers were read from: `html` (`<sup>`, exact)
+    or `markdown` (inferred from the flattened shape; see `sup_markers`)."""
+
     repealed_in_full: bool = False
     """The whole section was repealed; the page prints only elided dots.
 
@@ -167,16 +197,29 @@ def _body_slice(lines: list[str]) -> tuple[int, int, str, str]:
     head_idx, match = head
 
     end = next(
-        (j for j in range(head_idx + 1, len(lines)) if _TAGGED_RE.match(lines[j])),
+        (
+            j
+            for j in range(head_idx + 1, len(lines))
+            if any(marker.match(lines[j]) for marker in _END_MARKERS)
+        ),
         None,
     )
     if end is None:
-        raise ProvisionParseError("no '- Tagged:' terminator after the heading")
+        raise ProvisionParseError(
+            "no end-of-provision marker after the heading "
+            "(expected '- Tagged:' or '[Share this Law]')"
+        )
 
     return head_idx, end, normalize(match.group(1)), normalize(match.group(2))
 
 
-def parse_provision(markdown: str, source_url: str, *, retrieved_at: str | None = None) -> Provision:
+def parse_provision(
+    markdown: str,
+    source_url: str,
+    *,
+    retrieved_at: str | None = None,
+    html: str | None = None,
+) -> Provision:
     """Parse a scraped page into a `Provision`, or raise.
 
     Raises `ProvisionParseError` when the body is empty or still carries page
@@ -199,7 +242,8 @@ def parse_provision(markdown: str, source_url: str, *, retrieved_at: str | None 
         raise ProvisionParseError(f"unknown amendment verb: {exc}") from exc
     body_lines = [ln for i, ln in enumerate(block) if i not in legend_lines]
 
-    amended = extract_amended_units(body_lines, footnotes)
+    sup = sup_markers(html) if html is not None else None
+    amended = extract_amended_units(body_lines, footnotes, sup)
     text = normalize("\n".join(body_lines).replace("\n", " "))
 
     if len(text) < 20 and not _is_wholly_repealed(text, footnotes):
@@ -221,4 +265,6 @@ def parse_provision(markdown: str, source_url: str, *, retrieved_at: str | None 
         footnotes=footnotes,
         amended_units=tuple(amended),
         repealed_in_full=_is_wholly_repealed(text, footnotes),
+        marker_source="html" if html is not None else "markdown",
+        inline_marker_count=len(sup) if sup is not None else None,
     )

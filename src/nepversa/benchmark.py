@@ -99,7 +99,8 @@ class BenchmarkItem:
     unit: str
 
     as_of_amendment: int | None
-    """The amendment ordinal the question is anchored to."""
+    """The amendment ordinal the question is anchored to. `None` when the
+    amendment is named by instrument, not ordinal; see `as_of_event`."""
 
     gold_state: VersionState
     gold_nuggets: tuple[Nugget, ...]
@@ -113,6 +114,9 @@ class BenchmarkItem:
     """`unverified` until a human audits it (the rule that only humans confirm gold)."""
 
     source_url: str = ""
+
+    as_of_event: str = ""
+    """The amendment event the question is anchored to, as the legend names it."""
 
     def score(self, answer: str) -> dict[str, bool]:
         """Two independent scores. Deliberately not averaged."""
@@ -151,13 +155,22 @@ def generate_point_in_time(
         return None
 
     anchor = version.from_amendment if version.from_amendment is not None else 0
-    ordinal_phrase = (
-        "before any amendment" if version.from_amendment is None
-        else f"after the {_ordinal_word(version.from_amendment)} Amendment"
-    )
+    ordinal_phrase = _anchor_phrase(version)
+    as_of = anchor if version.ordinal_known else None
+    event = version.event_label
+    # For an instrument-named amendment the anchor is the full phrase, so
+    # "before the X" and "after the X" are distinct points in the
+    # consistency check rather than one point with two gold states.
+    as_of_event = ordinal_phrase if (event and not version.ordinal_known) else event
     unit_ref = f"{version.citation_key} ({version.unit})"
 
     if version.state is VersionState.ABSENT:
+        # ABSENT is either the period before an INSERT or the period after a
+        # REPEAL; the provenance must say which.
+        if version.to_amendment is not None:
+            provenance = f"clause ({version.unit}) inserted by the {event or version.to_amendment}"
+        else:
+            provenance = f"clause ({version.unit}) repealed by the {event or version.from_amendment}"
         question = (
             f"Under {unit_ref}, {ordinal_phrase}: was clause ({version.unit}) "
             f"in force, and if so what did it provide?"
@@ -169,14 +182,17 @@ def generate_point_in_time(
             script=Script.DEVANAGARI,
             citation_key=version.citation_key,
             unit=version.unit,
-            as_of_amendment=anchor,
+            as_of_amendment=as_of,
             gold_state=VersionState.ABSENT,
             gold_nuggets=(Nugget("label", "absent"),),
             should_abstain=True,
-            provenance=f"clause ({version.unit}) inserted by amendment {version.to_amendment}",
+            provenance=provenance,
             source_url=source_url,
+            as_of_event=as_of_event,
         )
 
+    if not version.can_be_quoted:
+        return None  # "text" that is only an elision run: nothing to quote
     question = (
         f"Under {unit_ref}, {ordinal_phrase}: what did clause "
         f"({version.unit}) provide?"
@@ -188,15 +204,16 @@ def generate_point_in_time(
         script=Script.DEVANAGARI,
         citation_key=version.citation_key,
         unit=version.unit,
-        as_of_amendment=anchor,
+        as_of_amendment=as_of,
         gold_state=VersionState.PRESENT_TEXT_KNOWN,
         gold_nuggets=(
             Nugget("citation", version.citation_key),
             Nugget("exact", _salient_span(version.text or "")),
         ),
         should_abstain=False,
-        provenance=f"clause ({version.unit}) text as printed after amendment {version.from_amendment}",
+        provenance=f"clause ({version.unit}) text as printed after the {event or version.from_amendment}",
         source_url=source_url,
+        as_of_event=as_of_event,
     )
 
 
@@ -226,8 +243,9 @@ def generate_supersession(
         gold_state=VersionState.ABSENT,
         gold_nuggets=(Nugget("label", "absent"),),
         should_abstain=True,
-        provenance=f"clause ({version.unit}) repealed by amendment {version.from_amendment}",
+        provenance=f"clause ({version.unit}) repealed by the {version.event_label or version.from_amendment}",
         source_url=source_url,
+        as_of_event=version.event_label,
     )
 
 
@@ -250,7 +268,7 @@ def whole_section_repeal_item(row: dict, *, source_url: str = "") -> BenchmarkIt
         return None
 
     key = row["citation_key"]
-    ordinal = repeal.get("amendment_ordinal")
+    ordinal = repeal.get("event") or repeal.get("amendment_ordinal")
     return BenchmarkItem(
         item_id=_item_id(key, "whole", "T3"),
         question_type=QuestionType.T3_SUPERSESSION,
@@ -265,11 +283,26 @@ def whole_section_repeal_item(row: dict, *, source_url: str = "") -> BenchmarkIt
         gold_nuggets=(Nugget("label", "absent"),),
         should_abstain=True,
         provenance=(
-            f"whole section repealed by amendment {ordinal}: "
+            f"whole section repealed by the {ordinal}: "
             f"{repeal.get('text', '').strip()}"
         ),
         source_url=source_url,
     )
+
+
+def _anchor_phrase(version: ProvisionVersion) -> str:
+    """How a question names its point in time.
+
+    A version bounded by a named instrument is described by that instrument on
+    both sides ("before the Financial Act, 2075"); "before any amendment" would
+    be false for a clause whose Act had earlier, unrelated amendments.
+    """
+    if version.event_label and not version.ordinal_known:
+        side = "before" if version.from_amendment is None else "after"
+        return f"{side} the {version.event_label}"
+    if version.from_amendment is None:
+        return "before any amendment"
+    return f"after the {_ordinal_word(version.from_amendment)} Amendment"
 
 
 def _ordinal_word(n: int) -> str:

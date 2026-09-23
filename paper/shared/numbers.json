@@ -1,15 +1,15 @@
 {
   "corpus": {
-    "acts": 3,
-    "provisions": 109,
-    "amended_provisions": 10,
-    "amended_pct": 9.2,
-    "lettered_sections": 27,
-    "repealed_in_full": 7,
-    "amendment_units": 28,
-    "op_insert": 8,
-    "op_substitute": 16,
-    "op_repeal": 4
+    "acts": 5,
+    "provisions": 455,
+    "amended_provisions": 35,
+    "amended_pct": 7.7,
+    "lettered_sections": 43,
+    "repealed_in_full": 8,
+    "amendment_units": 99,
+    "op_insert": 47,
+    "op_substitute": 24,
+    "op_repeal": 28
   },
   "per_act": [
     {
@@ -27,14 +27,26 @@
     {
       "act": "bonus-act-2030",
       "provisions": 29,
-      "amended": 1,
-      "amended_pct": 3.4,
+      "amended": 3,
+      "amended_pct": 10.3,
       "lettered": 1,
       "repealed_in_full": 5,
       "insert": 1,
       "substitute": 2,
-      "repeal": 0,
-      "units_total": 3
+      "repeal": 3,
+      "units_total": 6
+    },
+    {
+      "act": "companies-act-2063-2006",
+      "provisions": 190,
+      "amended": 4,
+      "amended_pct": 2.1,
+      "lettered": 3,
+      "repealed_in_full": 0,
+      "insert": 3,
+      "substitute": 0,
+      "repeal": 6,
+      "units_total": 9
     },
     {
       "act": "foreign-exchange-regulation-act-2019",
@@ -47,18 +59,95 @@
       "substitute": 1,
       "repeal": 2,
       "units_total": 4
+    },
+    {
+      "act": "income-tax-act-2058-2002",
+      "provisions": 156,
+      "amended": 19,
+      "amended_pct": 12.2,
+      "lettered": 13,
+      "repealed_in_full": 1,
+      "insert": 36,
+      "substitute": 8,
+      "repeal": 15,
+      "units_total": 59
     }
   ],
   "benchmark": {
-    "items": 46,
-    "acts_covered": 3,
-    "t2_point_in_time": 36,
-    "t3_supersession": 10,
-    "abstention_expected": 22,
-    "abstention_pct": 47.8,
-    "nugget_label": 22,
-    "nugget_citation": 24,
-    "nugget_exact": 24,
-    "status_unverified": 46
+    "items": 181,
+    "acts_covered": 5,
+    "t2_point_in_time": 145,
+    "t3_supersession": 36,
+    "t2_abstention": 75,
+    "t3_abstention": 36,
+    "instrument_anchored": 98,
+    "abstention_expected": 111,
+    "abstention_pct": 61.3,
+    "nugget_label": 111,
+    "nugget_citation": 70,
+    "nugget_exact": 70,
+    "status_unverified": 0,
+    "status_verified": 181,
+    "status_rejected_by_audit": 0
+  },
+  "extraction_by_act": [
+    {
+      "act": "banking-offence-and-punishment-act-2064",
+      "units_html": 21,
+      "units_markdown": 21,
+      "agree": 21,
+      "md_only": 0,
+      "html_only": 0,
+      "provisions_disagreeing": 0
+    },
+    {
+      "act": "bonus-act-2030",
+      "units_html": 6,
+      "units_markdown": 3,
+      "agree": 3,
+      "md_only": 0,
+      "html_only": 3,
+      "provisions_disagreeing": 3
+    },
+    {
+      "act": "companies-act-2063-2006",
+      "units_html": 9,
+      "units_markdown": 9,
+      "agree": 9,
+      "md_only": 0,
+      "html_only": 0,
+      "provisions_disagreeing": 0
+    },
+    {
+      "act": "foreign-exchange-regulation-act-2019",
+      "units_html": 4,
+      "units_markdown": 4,
+      "agree": 4,
+      "md_only": 0,
+      "html_only": 0,
+      "provisions_disagreeing": 0
+    },
+    {
+      "act": "income-tax-act-2058-2002",
+      "units_html": 59,
+      "units_markdown": 42,
+      "agree": 36,
+      "md_only": 6,
+      "html_only": 23,
+      "provisions_disagreeing": 9
+    }
+  ],
+  "extraction": {
+    "units_html": 99,
+    "units_markdown": 79,
+    "agree": 73,
+    "md_only": 6,
+    "html_only": 26,
+    "provisions_disagreeing": 12,
+    "html_markers": 119,
+    "markers_on_units": 99,
+    "markers_whole_section": 8,
+    "markers_unattached": 12,
+    "provisions_unattached": 6
   }
 }

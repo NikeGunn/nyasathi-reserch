@@ -42,73 +42,64 @@ item traces to a specific sentence in the law.
 ## Contents
 
 ```
-corpus/       provision records with amendment provenance (see Licensing)
-benchmark/    NEPVERSA items with deterministic gold
+corpus/       provision records with amendment provenance (text redacted; see Licensing)
+benchmark/    NEPVERSA items with deterministic nugget gold
 src/nepversa/ the extraction pipeline
-tests/        153 tests, every safety check mutation-tested
-analysis/     table generation, release building, APA post-processing
-logs/         provenance, verified citations, literature notes
+tests/        216 tests, every safety check mutation-tested
+analysis/     numbers, tables, figures, audit, release and preflight scripts
+AUDIT/        audit_log.json: who checked each item, qualification, verdict
+REPRODUCE.md  exact steps to regenerate every number from scratch
 ```
 
-## Current release — v1.0.0
+## Current release — v2.0.0
 
 Versioning is defined in [`VERSIONING.md`](VERSIONING.md). For a dataset,
-**MAJOR means a published number may change**, so an item edit bumps the major
-version even when no code does. Cite the tag, never `main`.
+**MAJOR means a published number may change**. Cite the tag, never `main`.
+v1.0.0 contained 4 wrong items; see the erratum in [`CHANGELOG.md`](CHANGELOG.md).
 
 | | |
 |---|---|
-| Acts | 3 |
-| Provisions | 109 |
-| Amended provisions (clause footnotes) | 10 |
-| Amendment operations | 28 (8 insert, 16 substitute, 4 repeal) |
-| Sections repealed in full | 7 |
-| Amendment-inserted sections (lettered) | 27 |
-| **Benchmark items** | **46** (36 T2 point-in-time, 10 T3 supersession) |
-| Abstention-expected | 22 (47.8%) |
+| Acts | 5 |
+| Provisions | 455 |
+| Amended provisions (clause footnotes) | 35 (7.7%) |
+| Amendment operations | 99 (47 insert, 24 substitute, 28 repeal) |
+| Amendment-inserted (lettered) sections | 43 |
+| Sections repealed in full | 8 |
+| **Benchmark items** | **181** (145 T2 point-in-time, 36 T3 supersession) |
+| Abstention-expected | 111 (61.3%) |
 
 | Act | Provisions | Amended | Lettered | Repealed in full |
 |---|---|---|---|---|
 | Banking Offence and Punishment Act, 2064 | 34 | 6 | 5 | 1 |
-| Bonus Act, 2030 | 29 | 1 | 1 | 5 |
+| Bonus Act, 2030 | 29 | 3 | 1 | 5 |
+| Companies Act, 2063 | 190 | 4 | 3 | 0 |
 | Foreign Exchange (Regulation) Act, 2019 | 46 | 3 | 21 | 1 |
+| Income Tax Act, 2058 | 156 | 19 | 13 | 1 |
 
-**Every item is `status=unverified`. No human legal audit has been performed**,
-so there is no error rate and no inter-annotator agreement: those numbers do
-not exist. The version number is not a quality claim; read
-`RELEASE_MANIFEST.json`, whose `items_verified_by_human` field is currently 0.
-
-Closing that gap is the contribution this project needs most, and it needs a
-qualified legal reader. The protocol is in
-[`AUDIT_human_verification_required.md`](AUDIT_human_verification_required.md);
-if you can help, see [`CONTRIBUTING.md`](CONTRIBUTING.md).
+**Verification.** All 181 items were checked against their source footnotes by
+one auditor, the author (BCA; **not legally trained**; not independent of the
+pipeline): 181 correct, 0 incorrect, 0 unsure (`AUDIT/audit_log.json`).
+`status=verified` therefore means *checked against the published footnote by
+the author*, not endorsement by a legal professional. There is no
+inter-annotator agreement. An independent audit by a qualified legal reader is
+the contribution this project needs most: see
+[`AUDIT_human_verification_required.md`](AUDIT_human_verification_required.md)
+and [`CONTRIBUTING.md`](CONTRIBUTING.md).
 
 ## Reproducing
 
+Step-by-step instructions are in [`REPRODUCE.md`](REPRODUCE.md). In short:
+
 ```bash
-npm i -g @mendable/firecrawl-cli && firecrawl config   # scraping backend
-
-# rebuild the corpus from the live source
-PYTHONPATH=src python -m nepversa.harvest \
-    "https://nepallaws.com/Laws/<act-slug>/" \
-    --out corpus/raw/<act>.jsonl --cache corpus/cache/<act>
-
-# cross-check the signals against each other
-PYTHONPATH=src python -m nepversa.validate corpus/raw/*.jsonl
-
-# generate benchmark items
-PYTHONPATH=src python -m nepversa.build_benchmark corpus/raw/*.jsonl \
-    --out benchmark/candidates/items.jsonl
-
-# regenerate every number reported in the paper
-python analysis/make_tables.py
-
-# tests
-PYTHONPATH=src python -m pytest tests -q
+pip install pytest matplotlib defusedxml
+npm i -g @mendable/firecrawl-cli && firecrawl config    # scraping backend
+bash scripts_regenerate.sh                              # corpus -> items -> numbers -> figures
+python analysis/verify_rebuild.py --released corpus/ --rebuilt corpus/raw/
+PYTHONUTF8=1 PYTHONPATH=src python -m pytest tests -q
 ```
 
 Each provision record carries `source_url`, `retrieved_at` and `text_sha256`, so
-a rebuild can be verified byte-for-byte against ours.
+a rebuild can be verified byte-for-byte against this release.
 
 ## Licensing and redaction
 
@@ -138,7 +129,7 @@ publisher.
   quotation questions.
 - **Two question types populated.** T2 (point-in-time) and T3 (supersession).
   T1, T4 and T5 are defined but not yet built.
-- **Small scale.** Three Acts. The constraint is scraping quota, not method.
+- **Small scale.** Five Acts. The constraint is scraping quota, not method.
 - **Single source**, not independently reconciled against the Law Commission's
   own texts, those being the PDFs whose extraction failure motivated the source
   choice.
@@ -170,9 +161,9 @@ Three things made the failures visible, and they are built into this pipeline:
 
 ## Manuscript
 
-`NEPVERSA_manuscript_draft.pdf` is the current working draft (APA 7). It has not
-been peer reviewed and its findings concern extraction correctness, not model
-capability.
+[`NEPVERSA_preprint.pdf`](NEPVERSA_preprint.pdf) is the preprint matching this
+release. It has not been peer reviewed; its findings concern extraction
+correctness, not model capability.
 
 ## Contributing
 
@@ -186,19 +177,13 @@ item marked `verified` beyond the number the manifest records as audited**.
 
 ## Citation
 
-A manuscript describing this resource is in preparation. Until it appears, cite
-the repository at the version you used — `main` moves, and a reader who follows
-it later gets a different corpus from the one whose numbers they are checking.
+Cite the version you used — `main` moves.
 
 ```
 Bhagat, N. (2026). NEPVERSA: A version-aware Nepali statutory retrieval
-benchmark (Version 1.0.0) [Data set]. GitHub.
-https://github.com/NikeGunn/nyasathi-reserch/releases/tag/v1.0.0
+benchmark derived from amendment footnotes (Version 2.0.0) [Data set].
+https://github.com/NikeGunn/nyasathi-reserch/releases/tag/v2.0.0
 ```
 
 See `CITATION.cff`, whose version field is generated from `VERSION` so it
 cannot drift from the tag.
-
-## Contact
-
-Nikhil Bhagat, programmer@nikhilbhagat.com.np

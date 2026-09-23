@@ -33,6 +33,8 @@ def _amended_units_from_row(row: dict) -> list[AmendedUnit]:
             amendment_ordinal=u.get("amendment_ordinal"),
             footnote_marker=u.get("footnote_marker", ""),
             text=u.get("text", ""),
+            amendment_event=u.get("amendment_event", ""),
+            parent=u.get("parent", ""),
         )
         for u in row.get("amended_units", [])
     ]
@@ -51,6 +53,36 @@ def items_from_row(row: dict) -> list[BenchmarkItem]:
         return []
     versions = build_versions(row["citation_key"], units)
     return generate_for_provision(versions, source_url=url)
+
+
+class ContradictoryGoldError(ValueError):
+    """Two items ask the same question of the same unit and disagree."""
+
+
+def check_consistency(items: list[BenchmarkItem]) -> None:
+    """Refuse a benchmark that contradicts itself.
+
+    v1.0.0 shipped Foreign Exchange §2(g4) with two items anchored "before any
+    amendment": one with gold `absent`, one with gold text. Each item was
+    individually well-formed; only the pair was impossible. Two checks:
+
+    * item IDs are unique (a collision means two units were keyed as one);
+    * one (citation, unit, type, anchor) has one gold state.
+    """
+    seen_ids: dict[str, BenchmarkItem] = {}
+    gold: dict[tuple, str] = {}
+    for it in items:
+        if it.item_id in seen_ids:
+            raise ContradictoryGoldError(f"duplicate item id {it.item_id}: {it.question!r}")
+        seen_ids[it.item_id] = it
+        key = (it.citation_key, it.unit, it.question_type, it.as_of_amendment, it.as_of_event)
+        state = it.gold_state.value
+        if key in gold and gold[key] != state:
+            raise ContradictoryGoldError(
+                f"{it.citation_key}({it.unit}) {it.question_type.value} at "
+                f"{it.as_of_event or it.as_of_amendment}: gold is both {gold[key]} and {state}"
+            )
+        gold[key] = state
 
 
 def _row(item: BenchmarkItem) -> dict:
@@ -87,6 +119,7 @@ def main(argv: list[str] | None = None) -> int:
                 ops.update(u.operation.value for u in units)
             items.extend(items_from_row(row))
 
+    check_consistency(items)  # before anything is written
     args.out.parent.mkdir(parents=True, exist_ok=True)
     with args.out.open("w", encoding="utf-8") as fh:
         for item in items:

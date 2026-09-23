@@ -122,7 +122,25 @@ class TestDates:
             assert v.from_date_bs is None
             assert v.to_date_bs is None
 
-    def test_ordinal_may_be_unknown(self) -> None:
-        """`Added by amendment.` with no ordinal still yields usable windows."""
-        before, after = versions_for_unit(KEY, _unit(Operation.INSERT, ordinal=None))
-        assert before.to_amendment is None and after.from_amendment is None
+    def test_no_ordinal_and_no_named_event_yields_no_versions(self) -> None:
+        """REGRESSION. This test used to assert `before.to_amendment is None and
+        after.from_amendment is None` — i.e. that both versions are in force
+        from enactment onward. That was the bug, pinned by its own test: v1.0.0
+        shipped Foreign Exchange §2(g4) as both absent and present "before any
+        amendment". An event we cannot name cannot anchor a question."""
+        assert versions_for_unit(KEY, _unit(Operation.INSERT, ordinal=None)) == []
+
+    def test_named_instrument_gives_unit_local_bounds(self) -> None:
+        """MUTATION: drop the `n = 1` fallback and both bounds are `None` again."""
+        unit = AmendedUnit(
+            unit="g4", operation=Operation.INSERT, amendment_ordinal=None,
+            footnote_marker="1", text="Some clause text.",
+            amendment_event="Financial Act, 2075",
+        )
+        before, after = versions_for_unit(KEY, unit)
+        assert (before.from_amendment, before.to_amendment) == (None, 1)
+        assert (after.from_amendment, after.to_amendment) == (1, None)
+        assert before.event_label == after.event_label == "Financial Act, 2075"
+        assert not before.ordinal_known
+        assert version_at([before, after], "g4", 0) is before
+        assert version_at([before, after], "g4", 1) is after

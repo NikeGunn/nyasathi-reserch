@@ -78,14 +78,34 @@ class ProvisionVersion:
     to_date_bs: str | None = None
     """Set only from an independently verified commencement date."""
 
+    event_label: str = ""
+    """The amendment event that bounds this version, as the legend names it.
+
+    When the legend names an instrument rather than an ordinal (`Financial Act,
+    2075`), the bounds are **unit-local**: `0` is before that event and `1`
+    after it, and nothing here orders it against another unit's amendments.
+    Before this field existed such a unit got `None` on both bounds, which
+    `None`-means-enactment read as "in force since enactment and still in
+    force", on both sides of the amendment at once."""
+
+    ordinal_known: bool = True
+
     @property
     def is_current(self) -> bool:
         return self.to_amendment is None
 
     @property
     def can_be_quoted(self) -> bool:
-        """Whether a benchmark item may require this version's exact wording."""
-        return self.state is VersionState.PRESENT_TEXT_KNOWN and bool(self.text)
+        """Whether a benchmark item may require this version's exact wording.
+
+        Wording means words: Income Tax §10 prints sub-section 3) as a row of
+        dots under an "Amended by the Financial Act, 2075" legend, and the
+        generator produced an item whose verbatim gold was `……………`. The
+        source contradicts itself there (a substitution with nothing
+        substituted), so no quotation item is defensible.
+        """
+        substance = "".join(ch for ch in (self.text or "") if ch not in " .…।\t\n")
+        return self.state is VersionState.PRESENT_TEXT_KNOWN and len(substance) >= 3
 
     def governs_at(self, amendment_ordinal: int) -> bool:
         """Whether this version is in force *after* `amendment_ordinal` applied.
@@ -108,15 +128,38 @@ def versions_for_unit(citation_key: str, amended: AmendedUnit) -> list[Provision
     — except where the source cannot support a claim about one of them.
     """
     n = amended.amendment_ordinal
+    label = amended.amendment_event
+    ordinal_known = n is not None
+    if n is None:
+        if not label:
+            # Neither an ordinal nor a named instrument: the event cannot be
+            # stated in a question, so no version is claimed at all.
+            return []
+        n = 1  # unit-local: before (0) / after (1) the named event
 
+    unit = amended.path
+    versions = _versions(citation_key, unit, amended, n)
+    return [
+        ProvisionVersion(
+            x.citation_key, x.unit, x.state, x.text,
+            from_amendment=x.from_amendment, to_amendment=x.to_amendment,
+            event_label=label, ordinal_known=ordinal_known,
+        )
+        for x in versions
+    ]
+
+
+def _versions(
+    citation_key: str, unit: str, amended: AmendedUnit, n: int
+) -> list[ProvisionVersion]:
     if amended.operation is Operation.INSERT:
         return [
             ProvisionVersion(
-                citation_key, amended.unit, VersionState.ABSENT, None,
+                citation_key, unit, VersionState.ABSENT, None,
                 from_amendment=None, to_amendment=n,
             ),
             ProvisionVersion(
-                citation_key, amended.unit, VersionState.PRESENT_TEXT_KNOWN, amended.text,
+                citation_key, unit, VersionState.PRESENT_TEXT_KNOWN, amended.text,
                 from_amendment=n, to_amendment=None,
             ),
         ]
@@ -126,11 +169,11 @@ def versions_for_unit(citation_key: str, amended: AmendedUnit) -> list[Provision
             # The repealed wording is not printed, so the earlier period is
             # PRESENT_TEXT_UNKNOWN: we know it existed, not what it said.
             ProvisionVersion(
-                citation_key, amended.unit, VersionState.PRESENT_TEXT_UNKNOWN, None,
+                citation_key, unit, VersionState.PRESENT_TEXT_UNKNOWN, None,
                 from_amendment=None, to_amendment=n,
             ),
             ProvisionVersion(
-                citation_key, amended.unit, VersionState.ABSENT, None,
+                citation_key, unit, VersionState.ABSENT, None,
                 from_amendment=n, to_amendment=None,
             ),
         ]
@@ -138,11 +181,11 @@ def versions_for_unit(citation_key: str, amended: AmendedUnit) -> list[Provision
     # SUBSTITUTE
     return [
         ProvisionVersion(
-            citation_key, amended.unit, VersionState.PRESENT_TEXT_UNKNOWN, None,
+            citation_key, unit, VersionState.PRESENT_TEXT_UNKNOWN, None,
             from_amendment=None, to_amendment=n,
         ),
         ProvisionVersion(
-            citation_key, amended.unit, VersionState.PRESENT_TEXT_KNOWN, amended.text,
+            citation_key, unit, VersionState.PRESENT_TEXT_KNOWN, amended.text,
             from_amendment=n, to_amendment=None,
         ),
     ]

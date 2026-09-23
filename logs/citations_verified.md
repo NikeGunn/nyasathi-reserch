@@ -31,6 +31,36 @@ Verified **2026-09-19**.
 `anthropic2026claude` — tool citation required by APA §9.5; not a research
 paper, verified as the product page https://claude.ai.
 
+### Added 2026-09-23 (session 6) — related work for the international version
+
+Existence checked on the arXiv export API (`analysis/arxiv_lookup.py`); the
+published venue, page range and **author list copied from Crossref by DOI**
+(`analysis/crossref_doi.py`). Where a peer-reviewed version exists, it is the
+one cited.
+
+| Key | Verified via | Published record |
+|---|---|---|
+| `louis2022bsard` | arXiv 2108.11792 + Crossref | ACL 2022 (long), 6789–6803, doi:10.18653/v1/2022.acl-long.468 |
+| `zhang2021situatedqa` | arXiv 2109.06157 + Crossref | EMNLP 2021, 7371–7387, doi:10.18653/v1/2021.emnlp-main.586 |
+| `chen2021timeqa` | arXiv 2108.06314 | cited as arXiv (no DOI-bearing published record found) |
+| `dhingra2022timeaware` | arXiv 2106.15110 + Crossref | TACL 10, 257–273, doi:10.1162/tacl_a_00459 |
+| `liska2022streamingqa` | arXiv 2205.11388 | cited as arXiv; 14 authors, first six listed + "others" |
+| `rajpurkar2018squad2` | arXiv 1806.03822 + Crossref | ACL 2018 (short), 784–789, doi:10.18653/v1/P18-2124 |
+| `guha2023legalbench` | arXiv 2308.11462 + Crossref | NeurIPS 36, 44123–44279, doi:10.52202/075280-1915; 40 authors, first five + "others" |
+| `pipitone2024legalbenchrag` | arXiv 2408.10343 | cited as arXiv |
+| `hou2025clerc` | arXiv 2406.17186 + Crossref | Findings of NAACL 2025, 7898–7913, doi:10.18653/v1/2025.findings-naacl.441 |
+| `mahari2024lepard` | arXiv 2311.09356 + Crossref | ACL 2024 (long), 9863–9877, doi:10.18653/v1/2024.acl-long.532. **Published title differs from arXiv** ("…Judicial Citations to Precedent"); the published title is used |
+| `pradeep2024nuggets` | arXiv 2411.09607 | cited as arXiv |
+| `robertson2009bm25` | Crossref | doi:10.1561/1500000019. Crossref returns volume 4, pp. 1–174 (an Emerald record); volume and pages are **omitted** rather than reconciled from memory |
+| `timilsina2022nepberta` | Crossref | AACL-IJCNLP 2022 (short), 273–284, doi:10.18653/v1/2022.aacl-short.34 |
+| `raut2026neplegit` | arXiv 2609.16010 | cited as arXiv. **Last author Bal Krishna Bal: authorship guard applies (cited only)** |
+
+Transport notes, both of which read as "no results" until the layer was named:
+the arXiv MCP server and Python `urllib` both received **HTTP 406** from
+arXiv's CDN on every request on 2026-09-23 while `curl` received 200 for the
+identical URL; DBLP's API answered with an HTML bot-challenge page under HTTP
+200, which a JSON parser reports as a decode error.
+
 ## Draft placeholders RESOLVED by this pass
 
 | Draft placeholder | Resolution |
@@ -79,6 +109,15 @@ arXiv full-text queries run 2026-09-19:
 **Conclusion: no prior work on Nepali version-aware statutory retrieval, and no
 prior NLP work using Bikram Sambat validity windows.** NEPVERSA's core claim
 stands. Re-run this guard before submission.
+
+**Re-run 2026-09-23 (before arXiv):** `abs:"Bikram Sambat"` → 0.
+`abs:Nepali AND (abs:legal OR abs:law OR abs:statute)` → 3: Wagle et al.,
+Thapa et al. (both already cited) and **NepLEGiT (Raut et al., 2609.16010)**, a
+30M-parameter GPT-2 pre-trained on ~4M tokens of Nepali legal text including
+codes. It uses statutes but has no amendments, versions or dates. Now cited.
+Versioned/point-in-time legal queries in cs.CL return only the contract-
+amendment classifier (2106.14619) and FiscalQA Pro (already cited). Claim
+stands.
 
 ## PENDING — verify before citing
 

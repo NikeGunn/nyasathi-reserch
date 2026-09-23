@@ -23,7 +23,8 @@ from __future__ import annotations
 
 import re
 import unicodedata
-from dataclasses import dataclass
+from html import unescape
+from dataclasses import dataclass, replace
 from enum import Enum
 
 
@@ -75,6 +76,12 @@ _OPS_EN = {
     "omitted": Operation.REPEAL,
     "taken out": Operation.REPEAL,
     "struck out": Operation.REPEAL,
+    # The Income Tax Act 2058 prints "Extreted from the Financial Act,
+    # 2080(2023)" against a clause whose body is a row of dots. The misspelling
+    # is the source's, kept verbatim so the legend still resolves; "extracted"
+    # is the translation of झिकिएको ("taken out") that it misspells.
+    "extracted": Operation.REPEAL,
+    "extreted": Operation.REPEAL,
 }
 _OPS_NE = {
     "थप": Operation.INSERT,          # थप / थप गरिएको
@@ -103,25 +110,32 @@ _DEVA_DIGITS = str.maketrans("०१२३४५६७८९", "0123456789")
 _LEGEND_RE = re.compile(r"^\s*(\d+)[\.\)]?\s*([A-Za-zऀ-ॿ]\S*.*)$")
 
 # An inline marker: a footnote digit immediately followed by the unit it
-# governs. Two published forms, both seen in the same Act:
+# governs. Four published forms, across four Acts:
 #
-#   1(d1)  — footnote 1, lettered clause (d1)          [§7]
-#   11)    — footnote 1, numbered sub-section 1)       [§9, §15, §19]
+#   1(d1)  — footnote 1, lettered clause (d1)          [Banking §7]
+#   1 (b)  — the same, with a space                    [Companies §13]
+#   11)    — footnote 1, numbered sub-section 1)       [Banking §9, §15, §19]
+#   2c)    — footnote 2, lettered clause c)            [Income Tax; also 1h1),
+#            34a) = footnote 3, clause 4a), 1av1) = footnote 1, clause av1)]
 #
-# The second form is why this is not simply `(\d+)\(`. `11)` is not
-# "sub-section eleven": the leading digit is the footnote marker and the rest
-# is the unit. The alternation is ordered so the bracketed form wins, and the
-# numbered form takes exactly ONE leading digit — footnote markers in these
-# editions are single-digit, and consuming more would silently renumber the
-# sub-section it governs.
+# The last two are why this is not simply `(\d+)\(`. `11)` is not
+# "sub-section eleven" and `34a)` is not footnote 34: the leading digit is the
+# footnote marker and the rest is the unit. The unbracketed forms take exactly
+# ONE leading digit — footnote markers in these editions are single-digit, and
+# consuming more would silently renumber the unit it governs. (`34a)` sits
+# under a legend numbered 1, 2, 3: footnote 3, inserted clause 4a.)
+#
+# Missing the space form and the lettered form cost the Companies Act its only
+# amended section (§13, six units repealed) and the Income Tax Act its clauses
+# c), h1), 4a), av1): the rows parsed cleanly and read as un-amended.
 #
 # `(?<![\w])` keeps this from matching inside an ordinary cross-reference such
 # as "clause (d1) of Section 5".
 _INLINE_RE = re.compile(
     r"(?<![\w])(?:"
-    r"(\d+)\(([^()\s]{1,10})\)"      # 1(d1) / २(ङ)
+    r"(\d+)\s?\(([^()\s]{1,10})\)"                   # 1(d1) / 1 (b) / २(ङ)
     r"|"
-    r"(\d)(\d{1,2})\)"               # 11)  -> footnote 1, unit 1)
+    r"(\d)(\d{1,2}[a-z]?\d?|[a-z]{1,2}\d{0,2})\)"     # 11) / 2c) / 1h1) / 34a)
     r")"
 )
 
@@ -155,6 +169,31 @@ class Footnote:
     text: str
     """The legend sentence verbatim, for audit."""
 
+    event: str = ""
+    """The amendment event, as the legend names it: `First Amendment`, or the
+    amending instrument (`Financial Act, 2075`) when the legend names an Act
+    instead of an ordinal. Empty when the legend names neither."""
+
+
+_INSTRUMENT_RE = re.compile(r"\b(?:by|from)\s+the\s+(.+?)\s*\.?\s*$", re.IGNORECASE)
+
+
+def _event_label(sentence: str, ordinal: int | None) -> str:
+    """Name the amendment event a legend records.
+
+    An ordinal gives `First Amendment`. Without one, the legend's own words for
+    the instrument are kept verbatim (`Act to Amend Certain Nepal Acts, 2074`),
+    because the ordinal cannot be recovered: an Act amended by the Financial
+    Act, 2075 has no "Nth Amendment" position this source states.
+    """
+    if ordinal is not None:
+        return f"{_ORDINAL_WORDS.get(ordinal, f'{ordinal}th')} Amendment"
+    m = _INSTRUMENT_RE.search(sentence)
+    return normalize(m.group(1)) if m else ""
+
+
+_ORDINAL_WORDS = {n: w.capitalize() for w, n in _ORDINALS_EN.items()}
+
 
 @dataclass(frozen=True, slots=True)
 class AmendedUnit:
@@ -168,6 +207,20 @@ class AmendedUnit:
     footnote_marker: str
     text: str
     """The unit's current text, after the amendment."""
+
+    amendment_event: str = ""
+    """The footnote's `event`: what to call the amendment in a question."""
+
+    parent: str = ""
+    """The nearest numbered unit above this one (`4` for clause `c` printed
+    under sub-section `4)`), or empty. Clause labels repeat within a provision:
+    Income Tax §4 has a repealed clause `c` under sub-section 3 and another
+    under sub-section 4, and keyed on the label alone the two collided."""
+
+    @property
+    def path(self) -> str:
+        """`4(c)` when a parent is known, else the bare label."""
+        return f"{self.parent}({self.unit})" if self.parent and self.parent != self.unit else self.unit
 
     @property
     def text_before_available(self) -> bool:
@@ -198,10 +251,16 @@ class UnknownAmendmentVerbError(FootnoteParseError):
 
 
 _LOOKS_LIKE_AMENDMENT = re.compile(
-    r"\bby\s+(?:the\s+)?\S*\s*amendment\b|संशोधनद्वारा|संशोधनबाट",
+    r"\bby\s+(?:the\s+)?\S*\s*amendment\b|संशोधनद्वारा|संशोधनबाट"
+    # A named amending instrument with its year, at the END of the sentence:
+    # "... by the Financial Act, 2075.", "... from the Financial Act,
+    # 2080(2023)". End-anchored because body prose also cites Acts by name
+    # ("registered under the Companies Act, 2063, shall ...") and continues.
+    r"|\b(?:by|from)\s+the\s+[^.]*?\bact,?\s*\d{4}\s*(?:\(\d{4}\))?\s*(?:bs)?\.?\s*$",
     re.IGNORECASE,
 )
-"""Footnote grammar: "**by** the First Amendment", `संशोधन` + instrumental case.
+"""Footnote grammar: "**by** the First Amendment", `संशोधन` + instrumental case,
+or a named amending Act closing the sentence.
 
 Deliberately narrower than the word "amendment". Statutes contain ordinary
 numbered clauses *about* amendment — "Amendment of bylaws requires a general
@@ -210,8 +269,56 @@ Matching the bare word made those raise `UnknownAmendmentVerbError`, which
 would reject valid provisions and lose real text.
 
 The agentive "by ... Amendment" is what distinguishes a footnote recording who
-changed the provision from prose that merely discusses amendment.
+changed the provision from prose that merely discusses amendment. The
+instrument alternative was added when "2 Extreted from the Financial Act,
+2080(2023)" was skipped as an ordinary list item: no known verb, no "by ...
+Amendment", so the guard stayed silent and the clause read as original.
 """
+
+_VERBLESS_RE = re.compile(r"^the\s+(\w+)\s+amendment\.?$", re.IGNORECASE)
+"""A legend naming the amendment and nothing else: "1 The first amendment."
+
+The Companies Act 2063 uses this for §13, where every unit it marks is a row
+of dots. The legend states no operation, so the operation is read from what
+the text shows: see `_resolve_verbless`.
+"""
+
+_ELIDED_UNIT_RE = re.compile(r"^[\s\.…।]*$")
+
+_INSERTED_LABEL_RE = re.compile(r"^(?:\d{1,3}[A-Z]|[a-z]{1,2}\d{1,2})$")
+"""A unit label that exists only because it was inserted: `1A`, `u1`, `d1`."""
+
+
+def _resolve_verbless(marker: str, lines: list[str]) -> Operation:
+    """The operation of a verbless legend, from the units it marks.
+
+    REPEAL when every unit it governs is elided (the printed text shows that
+    nothing remains); INSERT when every unit it governs carries an
+    insertion-form label. Anything else, a substituted clause above all, is not
+    readable from this source, and raises rather than guessing.
+    """
+    governed: list[tuple[str, str]] = []
+    for raw in lines:
+        m = _INLINE_RE.match(_fold_digits(raw.strip()))
+        if not m:
+            continue
+        found = m.group(1) or m.group(3)
+        label = m.group(2) or m.group(4)
+        if found == marker:
+            governed.append((raw.strip()[m.end():], label))
+    if governed and all(_ELIDED_UNIT_RE.match(t) for t, _ in governed):
+        return Operation.REPEAL
+    # An inserted unit is numbered to fit between existing ones: sub-section
+    # `1A` between (1) and (2), clause `u1` after (u). That is the same
+    # numbering signal `inserted_by_numbering` reads at section level, and it
+    # resolved all three verbless legends over live text in the Companies Act
+    # (§9 (1A), the registration section's (1A), the definitions' (u1)).
+    if governed and all(_INSERTED_LABEL_RE.match(label) for _, label in governed):
+        return Operation.INSERT
+    raise UnknownAmendmentVerbError(
+        f"footnote {marker} states no operation and marks "
+        f"{len(governed)} unit(s) that are not all elided"
+    )
 
 
 def _classify(sentence: str) -> tuple[Operation, int | None]:
@@ -274,61 +381,220 @@ def parse_footnotes(lines: list[str]) -> tuple[dict[str, Footnote], set[int]]:
     """
     found: dict[str, Footnote] = {}
     legend_lines: set[int] = set()
-    for i, raw in enumerate(lines):
-        m = _LEGEND_RE.match(_fold_digits(raw.strip()))
-        if not m:
+    # The legend is the TRAILING block of the provision: walk up from the foot
+    # and stop at the first line that is not a legend. Accepting a legend-shaped
+    # line anywhere let an ordinary sub-section that happens to contain a verb
+    # ("2) If any amendment is made ... removed ...") be read as a footnote, and
+    # the caller then deleted it from the quotable text: twelve provisions of
+    # the Companies Act lost a sub-section this way, silently.
+    for i in range(len(lines) - 1, -1, -1):
+        stripped = lines[i].strip()
+        if not stripped or _SEPARATOR_RE.match(stripped):
             continue
+        m = _LEGEND_RE.match(_fold_digits(stripped))
+        if not m:
+            break
         marker, sentence = m.group(1), normalize(m.group(2))
         try:
             operation, ordinal = _classify(sentence)
+            if not _LEGEND_GRAMMAR.search(sentence):
+                break  # a body sentence that happens to contain a verb
         except FootnoteParseError:
-            if _LOOKS_LIKE_AMENDMENT.search(sentence):
+            verbless = _VERBLESS_RE.match(sentence)
+            if verbless:
+                operation = _resolve_verbless(marker, lines)
+                ordinal = _ORDINALS_EN.get(verbless.group(1).lower())
+            elif _LOOKS_LIKE_AMENDMENT.search(sentence):
                 raise UnknownAmendmentVerbError(sentence)
-            continue  # an ordinary numbered list item
+            else:
+                break  # an ordinary numbered list item: the legend (if any) ended
         found[marker] = Footnote(
             marker=marker,
             operation=operation,
             amendment_ordinal=ordinal,
             text=sentence,
+            event=_event_label(sentence, ordinal),
         )
         legend_lines.add(i)
     return found, legend_lines
 
 
+_LEGEND_GRAMMAR = re.compile(
+    r"^[A-Za-z]+(?:\s+out)?\s+(?:by|from)\s+(?:the\s+)?.*\b(?:acts?|amendment)\b"
+    r"|संशोधन",
+    re.IGNORECASE,
+)
+"""What a legend sentence looks like: it OPENS with the verb, then "by/from the"
+and an instrument (`Taken out by the First Amendment`, `Added by the Act to
+Amend Certain Nepal Acts ...`, `Extreted from the Financial Act, 2080`).
+
+Audited against every legend-shaped trailing line in the five cached Acts
+(2026-09-23): all 61 real legends match, and none of the body sentences that
+merely contain a verb ("The Office shall register the amended prospectus",
+"No auditor ... shall be removed pending ...") does, because a statute's
+sentence does not begin with a bare participle followed by "by the"."""
+
+_SEPARATOR_RE = re.compile(r"^(?:[*\-_]\s*){3,}$")
+"""`* * *` / `---`: the rule some pages print between body and legend."""
+
+
+# The follow text is captured to the next tag and only THEN unescaped and cut:
+# a fixed 60-character window split `&#8230;` mid-entity, left a stray `&`, and
+# lost Companies §13 (5), (6), (7).
+_SUP_RE = re.compile(r"<sup[^>]*>\s*([0-9०-९]+)\s*</sup>([^<]{0,2000})", re.IGNORECASE)
+"""An inline superscript marker and the text that follows it, up to the next tag.
+
+Legend superscripts (`<sup>1 Inserted by ...</sup>`) carry prose, not a bare
+number, and do not match.
+"""
+
+_UNIT_RE = re.compile(r"^\(?([^()\s]{1,10})\)")
+
+_PLAIN_NUMBERED_RE = re.compile(r"^\(?(\d{1,3}[A-Z]?)\)\s")
+"""An unmarked numbered unit, `4) ...` or `(4) ...`: a candidate parent."""
+
+_SUP_MATCH_CHARS = 12
+"""How much of the text after a superscript must agree with the Markdown line."""
+
+
+def _squash(text: str) -> str:
+    """Drop whitespace and elision characters, for alignment only (never stored)."""
+    return re.sub(r"[\s\.…।]+", "", text)
+
+
+def sup_markers(html: str) -> list[tuple[str, str]]:
+    """Every inline footnote marker on the page, read from `<sup>` in the HTML.
+
+    Returns `(marker, following_text)` pairs in page order. This is the ground
+    truth that Markdown destroys: `<sup>2</sup>8)` and a plain `28)` flatten to
+    the same characters, and so do `<sup>1</sup>0)` (which does not exist) and
+    sub-section `10)` (which does). §88 and §95A of the Income Tax Act 2058 have
+    both kinds in one provision, and sequence heuristics would have to guess.
+    """
+    return [
+        (_fold_digits(m.group(1)), normalize(unescape(m.group(2))))
+        for m in _SUP_RE.finditer(html)
+    ]
+
+
+def _unit_from_sup(
+    line: str, sup_marks: list[tuple[str, str]]
+) -> tuple[str, str, str] | None:
+    """Match a Markdown line to an unused superscript, consuming it.
+
+    Returns `(marker, unit, text)` when the line is the flattened form of
+    `<sup>marker</sup>` + the recorded following text, else `None`.
+    """
+    folded = _fold_digits(line)
+    for idx, (marker, follow) in enumerate(sup_marks):
+        if not folded.startswith(marker):
+            continue
+        rest = normalize(folded[len(marker):])
+        # Compare with elision runs and spaces squeezed out: the HTML prints a
+        # repealed unit as `(5)&#8230;&#8230;...` and the Markdown as
+        # `(5)………..`, different lengths of the same dots. A raw prefix
+        # compare lost Companies §13 (5), (6), (7) this way.
+        probe = _squash(follow)[:_SUP_MATCH_CHARS]
+        if len(probe) < 2 or not _squash(rest).startswith(probe):
+            continue
+        unit = _UNIT_RE.match(rest)
+        if unit is None:
+            continue
+        del sup_marks[idx]
+        return marker, unit.group(1), normalize(rest[unit.end():])
+    # Label FIRST, then the marker: Bonus Act §5 prints the repealed
+    # sub-section 4 as `4) <sup>1</sup>……`. The follow text is then only
+    # dots, so the prefix probe above has nothing to match on; require the
+    # label shape, the marker right after it, and the same (squeezed) rest.
+    for idx, (marker, follow) in enumerate(sup_marks):
+        m = re.match(
+            rf"^\(?(\d{{1,3}}[A-Z]?|[a-z]{{1,2}}\d{{0,2}})\)\s*{re.escape(marker)}(.*)$", folded
+        )
+        if m is None or _squash(m.group(2))[:_SUP_MATCH_CHARS] != _squash(follow)[:_SUP_MATCH_CHARS]:
+            continue
+        del sup_marks[idx]
+        return marker, m.group(1), normalize(m.group(2))
+    return None
+
+
 def extract_amended_units(
-    body_lines: list[str], footnotes: dict[str, Footnote]
+    body_lines: list[str],
+    footnotes: dict[str, Footnote],
+    sup_marks: list[tuple[str, str]] | None = None,
 ) -> list[AmendedUnit]:
     """Attach each inline marker to its footnote.
+
+    With `sup_marks` (from the page HTML) a line is marked **only** if a
+    superscript says so. Without them the marker is inferred from the Markdown
+    shape by `_INLINE_RE`, which cannot tell `28)` (footnote 2, sub-section 8)
+    from sub-section 28; the provision records which source was used.
 
     A marker whose number has no legend entry is **dropped**, not guessed: an
     amendment we cannot describe is not evidence. Under-reporting is safe here;
     inventing an operation is not.
     """
+    remaining = list(sup_marks) if sup_marks is not None else None
     units: list[AmendedUnit] = []
+    parent = ""
     for raw in body_lines:
         line = raw.strip()
         if not line:
             continue
-        m = _INLINE_RE.match(_fold_digits(line))
-        if not m:
-            continue
-        # Groups 1-2 are the bracketed form `1(d1)`; groups 3-4 the numbered
-        # form `11)`. Exactly one pair is populated.
-        marker, unit = (m.group(1), m.group(2)) if m.group(1) else (m.group(3), m.group(4))
+        plain = _PLAIN_NUMBERED_RE.match(line)
+        if remaining is not None:
+            hit = _unit_from_sup(line, remaining)
+            if hit is None:
+                if plain:
+                    parent = plain.group(1)
+                continue
+            marker, unit, text = hit
+        else:
+            m = _INLINE_RE.match(_fold_digits(line))
+            if not m:
+                if plain:
+                    parent = plain.group(1)
+                continue
+            # Groups 1-2 are the bracketed form `1(d1)`; groups 3-4 the
+            # unbracketed form `11)` / `2c)`. Exactly one pair is populated.
+            marker, unit = (m.group(1), m.group(2)) if m.group(1) else (m.group(3), m.group(4))
+            text = normalize(line[m.end():])
         note = footnotes.get(marker)
         if note is None:
+            if plain:
+                parent = plain.group(1)
             continue
-        text = normalize(line[m.end():])
+        if note.operation is Operation.REPEAL and not _ELIDED_UNIT_RE.match(text):
+            # Words omitted INSIDE a unit that survives: Bonus Act §8 prints
+            # `a) <sup>1</sup>…… theft of the enterprise's property ...` under
+            # "Omitted by the Fourth Amendment". Recording "clause (a) repealed"
+            # would make every item about (a) say it no longer exists. The
+            # marker stays unattached and the validator reports it.
+            continue
+        unit = normalize(unit)
         units.append(
             AmendedUnit(
-                unit=normalize(unit),
+                unit=unit,
                 operation=note.operation,
                 amendment_ordinal=note.amendment_ordinal,
                 footnote_marker=marker,
                 text=text,
+                amendment_event=note.event,
+                parent=parent,
             )
         )
-    return units
+        if unit[:1].isdigit():
+            parent = unit
+    # Qualify a label with its parent ONLY where the label repeats. The
+    # "nearest numbered unit above" is a heuristic about structure: it is right
+    # for Income Tax §4 (clause c under sub-sections 3 and 4) and wrong for a
+    # definitions section, where numbered items nest *under* lettered clauses
+    # and a top-level clause `av1` would be reported as `3(av1)`. Applied
+    # everywhere it asserted structure the page does not state; applied only to
+    # collisions it does the one job it exists for.
+    counts: dict[str, int] = {}
+    for u in units:
+        counts[u.unit] = counts.get(u.unit, 0) + 1
+    return [u if counts[u.unit] > 1 else replace(u, parent="") for u in units]
 
 
 def inserted_by_numbering(section_number: str) -> bool:

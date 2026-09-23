@@ -30,6 +30,8 @@ import json
 import re
 import subprocess
 import time
+import urllib.error
+import urllib.request
 from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
 from pathlib import Path
@@ -111,7 +113,11 @@ def _firecrawl_exe() -> str:
     """
     import shutil
 
-    found = shutil.which("firecrawl") or shutil.which("firecrawl.cmd")
+    # `.cmd` FIRST. Under Git Bash, PATH also holds npm's extensionless `sh`
+    # shim, `which("firecrawl")` returns it, and CreateProcess fails with
+    # WinError 193 ("not a valid Win32 application"). That killed both
+    # session-6 harvests on their first uncached page.
+    found = shutil.which("firecrawl.cmd") or shutil.which("firecrawl")
     if not found:
         raise HarvestError(
             "firecrawl CLI not on PATH — install it, or the empty result will "
@@ -137,6 +143,11 @@ def _firecrawl(url: str, fmt: str, *, main_only: bool = True, _retry: bool = Tru
         )
     except subprocess.TimeoutExpired as exc:
         raise HarvestError(f"firecrawl timed out after {_FIRECRAWL_TIMEOUT_S}s: {url}") from exc
+    except OSError as exc:
+        # The launcher could not start. Report it as a transport failure (the
+        # run then marks itself INVALID) rather than crashing mid-file with a
+        # traceback that leaves a truncated JSONL behind.
+        raise HarvestError(f"firecrawl could not be launched ({cmd[0]}): {exc}") from exc
     out = done.stdout.decode("utf-8", errors="replace")
     if done.returncode != 0:
         err = done.stderr.decode("utf-8", errors="replace")[:300]
@@ -150,6 +161,33 @@ def _firecrawl(url: str, fmt: str, *, main_only: bool = True, _retry: bool = Tru
     if not out.strip():
         raise HarvestError(f"firecrawl returned empty output for {url}")
     return out
+
+
+_HTML_PACE_S = 2.0
+"""Delay before each uncached plain-HTTP page fetch (robots.txt allows `/`)."""
+
+_HTML_UA = "Mozilla/5.0 (compatible; NEPVERSA-research/1.0; +https://github.com/NikeGunn/nyasathi-reserch)"
+"""A named User-Agent. Python's default `Python-urllib/3.x` is refused by some
+CDNs before the request is evaluated, which reads as the site failing
+(project notes: the Groq 403 `error code: 1010`)."""
+
+
+def _fetch_html(url: str) -> str:
+    """The page HTML over plain HTTP, or raise `HarvestError`.
+
+    Needed because Markdown flattens `<sup>2</sup>8)` into `28)`: the amendment
+    markers survive only in the HTML. Plain HTTP, not Firecrawl — the site
+    serves it directly and it costs no API credit.
+    """
+    req = urllib.request.Request(url, headers={"User-Agent": _HTML_UA})
+    try:
+        with urllib.request.urlopen(req, timeout=60) as resp:
+            body = resp.read().decode("utf-8", errors="strict")
+    except (urllib.error.URLError, TimeoutError, UnicodeDecodeError) as exc:
+        raise HarvestError(f"HTML fetch failed for {url}: {exc}") from exc
+    if "<sup" not in body and "Share this Law" not in body:
+        raise HarvestError(f"HTML for {url} does not look like a provision page")
+    return body
 
 
 def _links_on(url: str) -> set[str]:
@@ -237,7 +275,16 @@ def _cached_discover(act_url: str, cache_dir: Path | None) -> list[str]:
         return discover_provisions(act_url)
     index = cache_dir / "_urls.json"
     if index.exists():
-        return json.loads(index.read_text(encoding="utf-8"))
+        cached: list[str] = json.loads(index.read_text(encoding="utf-8"))
+        if not cached:
+            # The write path refuses to cache an empty list, but an index
+            # written before that guard existed is still on disk: the Bonus
+            # Act's was `[]`, and trusting it would have re-harvested the Act
+            # to an empty JSONL over 29 good rows. Refuse on read as well.
+            raise HarvestError(
+                f"cached discovery index {index} is empty; delete it to re-discover"
+            )
+        return cached
     urls = discover_provisions(act_url)
     if not urls:
         # A zero-provision discovery is a failure, not a fact about the Act, and
@@ -297,10 +344,26 @@ def harvest_act(
                     continue
                 if cached is not None:
                     cached.write_text(md, encoding="utf-8")
+            html_cached = cached.with_suffix(".html") if cached is not None else None
+            if html_cached is not None and html_cached.exists():
+                html = html_cached.read_text(encoding="utf-8")
+            else:
+                time.sleep(_HTML_PACE_S)
+                try:
+                    html = _fetch_html(url)
+                except HarvestError as exc:
+                    report.transport_failures += 1
+                    report.rejections.append(f"TRANSPORT {url}: {exc}")
+                    continue
+                if html_cached is not None:
+                    html_cached.write_text(html, encoding="utf-8")
             report.fetched += 1
             try:
                 prov = parse_provision(
-                    md, url, retrieved_at=datetime.now(timezone.utc).isoformat(timespec="seconds")
+                    md,
+                    url,
+                    retrieved_at=datetime.now(timezone.utc).isoformat(timespec="seconds"),
+                    html=html,
                 )
             except ProvisionParseError as exc:
                 report.rejected += 1
@@ -326,6 +389,8 @@ def _to_row(p: Provision) -> dict:
         "sha256": p.sha256,
         "inserted_by_amendment_numbering": p.was_inserted_by_amendment,
         "repealed_in_full": p.repealed_in_full,
+        "marker_source": p.marker_source,
+        "inline_marker_count": p.inline_marker_count,
         "footnotes": [asdict(f) | {"operation": f.operation.value} for f in p.footnotes.values()],
         "amended_units": [
             asdict(u) | {"operation": u.operation.value, "text_before_available": u.text_before_available}

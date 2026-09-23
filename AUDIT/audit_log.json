@@ -1,0 +1,921 @@
+{
+  "auditor": "Nikhil Bhagat",
+  "qualification": "BCA (Tribhuvan University); author of the benchmark; not legally trained",
+  "applied_at": "2026-09-23T11:12:40+00:00",
+  "sheet": "audit_sheet_v2.csv",
+  "items_total": 181,
+  "items_with_verdict": 181,
+  "counts": {
+    "correct": 181,
+    "incorrect": 0,
+    "unsure": 0
+  },
+  "items_verified_by_human": 181,
+  "verdicts": {
+    "nepversa-4b70a69e43a1": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-426a8bd63ac7": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-c33682bb21f9": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-4e5cfb274e8b": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-a35ecfc048b8": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-71782577d28b": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-bb9727b218e7": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-b1d84c120a32": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-88164e82e9b2": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-e189e560d32d": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-bcb26536952e": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-de0deb5c3a24": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-d8c0691f57f6": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-220ce1cdb170": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-9c6a3c913818": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-d70cad0a5256": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-06caf5602143": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-9a139796f065": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-bb5e83429568": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-b0dc2e93ff71": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-ef9f975e080d": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-96d58dd29264": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-08caca1f1944": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-8fd5d6039cdb": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-9b17741f5e42": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-60ef6cb1768f": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-37861f675587": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-edc566936bef": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-42d1aace2337": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-e293e2315712": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-5d79c2d9c8a0": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-bfc1de353b8e": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-d4aadb399096": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-9b5eabab707e": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-1de953ab990a": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-a07da9304c3d": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-bf152d289bca": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-2d22d4b01f3f": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-b8b0e4eaac5f": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-084992402343": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-69933079c18f": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-d74c88db0dbc": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-1a088431dbad": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-a216df5724bd": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-137aa79e7a38": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-42178222dfdd": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-99f41d00569f": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-60476515f819": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-065f5983ee00": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-33b8ea5d2df4": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-8e5eba95bc59": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-2ebe0d47801e": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-c7080bbe0607": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-ccaf8cfc183c": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-30e6198caf1d": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-532ea272502e": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-6bf111231aef": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-cb6caf4ab6b1": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-b35ee419048b": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-4f7b21b5e502": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-f4f93b46386b": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-d5b4d05768df": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-7b75b1f126cb": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-fec72e675920": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-72041d8530bd": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-88926214f8a4": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-f99d6401f037": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-7a15b8dc1886": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-9aab78d4285b": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-b53713c57a66": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-6a1d01144752": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-854d71bfc43f": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-410d629c088b": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-4427fceee161": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-cab33b54712f": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-520460784f52": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-8397b3c85aa8": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-4a340b192f4c": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-69863f6c165c": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-a1fe13c9abc7": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-3cae2118043d": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-562ed11960b4": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-f2b1d8b6ea5f": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-ac9f96346f39": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-d069874395ae": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-c62e5d604752": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-5500b58a979e": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-f6d7b5787e1e": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-07f6c49d5dbc": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-115ce66db7a9": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-f60be3e3dd72": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-088517475b1b": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-4657f1df8f60": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-f6cc0adc3b3b": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-3231c2114597": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-f8315a8f0287": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-a9feb7d2b100": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-d4b28d558acf": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-9b7fdf2c31a9": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-decec0e110bb": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-c9bec31d6cb8": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-a6aeb0c983d3": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-11a94e2ae4fe": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-2961a90fcb68": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-d9b38fc81c9e": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-938501da62ab": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-df7b2278be39": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-97151a82dfe0": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-22926c0e3978": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-41228ef6bdfc": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-deaf18c44d7a": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-7fe264dc120e": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-238844c9ab75": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-cc2f3bcc8610": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-457a4a91ee86": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-5dac31923cc5": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-e1df350058d2": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-a29778beffbf": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-9a441f66a899": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-90431f3b0ce5": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-6c6e748e891c": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-0b655aec6a19": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-c40ebc7d5dc3": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-79090f34845e": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-f3e747bb7f4c": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-df1dfe85da97": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-b28093a46f22": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-4e031d6eeedd": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-55fbd522d20c": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-699194b0f800": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-268f64c887b1": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-92607ead3900": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-f29b6dbe5b48": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-f7f9a99a0cad": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-4002a835e9ea": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-7e6acb26452b": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-e90ac466afcf": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-4420a1872b42": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-27aa6e9cff26": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-8e219c487bc4": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-419912c97f29": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-c44e55f898a8": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-2c2afa28bbb6": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-7e2bc54af439": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-06bc0ea7af89": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-d19506b6079d": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-b64164e0a80d": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-0845637d5251": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-d50884032df6": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-64a16378dd2b": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-73969b0a16b1": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-086d4bb4bfe0": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-a2a3138ecebe": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-72932e6dfbf2": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-57beb9cf4b18": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-b06c1ed5fa75": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-42d52c4ca716": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-daceff607e1c": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-da4dfc9f7159": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-b77128abc3f0": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-c363d4e57a39": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-f3ae1f4d6e81": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-ec657367fb61": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-6bba475c02db": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-b44a7e905c8f": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-fd2801d442a8": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-87334d8cd0e0": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-59b44e857fed": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-92d1bcbe68f1": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-62ce8074560d": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-15646a04b6e9": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-1632c093f17f": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-a58e8f7d6c9f": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-17df707727a1": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-442e45a9d62e": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-8e5d5a681801": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-472219ac7d80": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-d26ea187f949": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-c61c1b8601dc": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-3a036e776243": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    },
+    "nepversa-d950bd1ae77a": {
+      "verdict": "correct",
+      "corrected_answer": "",
+      "note": "Checked against source by the author (Nikhil Bhagat); attested in session 2026-09-23"
+    }
+  }
+}

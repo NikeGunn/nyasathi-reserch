@@ -10,6 +10,61 @@ or preprint, and any extraction defect found after release.
 
 ---
 
+## [2.0.0] — 2026-09-23
+
+MAJOR: every published number changes (3 → 5 Acts; 46 → 181 items), and four
+v1.0.0 items were wrong (erratum below).
+
+### Contents
+
+- 5 Acts, 455 provisions, 35 amended provisions, 99 amendment units
+  (47 insert, 24 substitute, 28 repeal), 43 lettered sections, 8 repealed in full.
+- 181 benchmark items: 145 T2 point-in-time, 36 T3 supersession;
+  111 (61.3%) abstention-expected. 98 T2 items anchored to a named instrument.
+- Added: Income Tax Act 2058 (156 provisions), Companies Act 2063 (190).
+
+### Verification status
+
+All 181 items were checked against their source footnotes by **one auditor,
+the author** (BCA, Tribhuvan University; **not legally trained**; not
+independent of the pipeline). Verdicts: 181 correct, 0 incorrect, 0 unsure.
+Recorded in `AUDIT/audit_log.json` by `analysis/audit_sheet.py`. There is no
+inter-annotator agreement (single auditor). An independent audit by a reader
+with legal training is still the most valuable contribution; see
+`AUDIT_human_verification_required.md`.
+
+### Erratum for v1.0.0 — 4 of 46 items were wrong
+
+`nepversa-9aab78d4285b`, `nepversa-842d44ed6b18`, `nepversa-b0f333e1b2a2`,
+`nepversa-02fce90c2f44` (Foreign Exchange Act §2(g4) contradictory pair;
+§10A(1) post-substitution text given as the pre-amendment answer; §11(1)
+"absent before any amendment" for a later-repealed clause). Cause: amendments
+named by instrument ("Financial Act, 2075") had both window bounds open. Fixed;
+`build_benchmark` now refuses contradictory item sets and
+`analysis/audit_items.py` flags all four on v1.0.0 and passes 181/181 on v2.0.0.
+Do not use v1.0.0 numbers.
+
+### Fixed (extraction defects, each with a mutation-tested test)
+
+Untagged pages rejected by a page-chrome terminator; `1 (b)` space form;
+`2c)` / `1h1)` / `34a)` lettered forms; label-first markers; verbless legends
+("The first amendment."); misspelt verbs ("Extreted"); instrument-named legends
+now carry an event label; Markdown `10)` misread as marker + `0)` (markers now
+read from HTML `<sup>`); `&#8230;` split in the sup window (lost 9 Income Tax
+repeals); duplicate clause labels; partial repeals no longer recorded as unit
+repeals; empty cached `_urls.json` no longer trusted.
+
+### Added
+
+- `REPRODUCE.md` and `scripts_regenerate.sh`: one command from cache to every
+  number and figure.
+- `analysis/audit_sheet.py` (export / apply / reapply), `analysis/audit_items.py`,
+  `analysis/verify_rebuild.py` (hash-compare a rebuild against this release),
+  `analysis/preflight_arxiv.py`, `analysis/render_numbers.py`.
+- `NEPVERSA_preprint.pdf`: the manuscript (ACM format) matching this release.
+
+---
+
 ## [1.0.0] — 2026-09-20
 
 First versioned release. The extraction method, item schema and scoring rule

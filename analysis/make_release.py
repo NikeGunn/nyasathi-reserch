@@ -39,6 +39,21 @@ _TEXT_FIELDS = ("text",)
 """Fields holding statutory text verbatim."""
 
 
+def _audit() -> dict:
+    """What the human audit log says, or that no audit has been applied."""
+    log = ROOT / "AUDIT" / "audit_log.json"
+    if not log.exists():
+        return {"items_verified_by_human": 0,
+                "summary": "NOT PERFORMED - every item is status=unverified; see "
+                           "AUDIT_human_verification_required.md"}
+    a = json.loads(log.read_text(encoding="utf-8"))
+    c = a["counts"]
+    return {"items_verified_by_human": a["items_verified_by_human"],
+            "summary": (f"{a['items_with_verdict']} of {a['items_total']} items audited by "
+                        f"{a['auditor']} ({a['qualification']}) on {a['applied_at'][:10]}: "
+                        f"{c['correct']} correct, {c['incorrect']} incorrect, {c['unsure']} unsure")}
+
+
 def _digest(s: str) -> str:
     return hashlib.sha256(s.encode("utf-8")).hexdigest()
 
@@ -167,7 +182,7 @@ def main(argv: list[str] | None = None) -> int:
             ".git", ".github", ".gitignore", "LICENSE", "README.md",
             "CITATION.cff", "CHANGELOG.md", "CONTRIBUTING.md", "VERSIONING.md",
             "AUDIT_human_verification_required.md",
-            "NEPVERSA_manuscript_draft.pdf",
+            "NEPVERSA_preprint.pdf", "REPRODUCE.md",
         }
         for child in out.iterdir():
             if child.name in keep:
@@ -195,7 +210,9 @@ def main(argv: list[str] | None = None) -> int:
     # decisions about the author's separate commercial tool.
     for rel in ("corpus/SOURCES.md", "benchmark/guidelines.md",
                 "logs/PROVENANCE.md", "logs/citations_verified.md",
-                "logs/lit_notes.md",
+                "logs/lit_notes.md", "scripts_regenerate.sh",
+                # Verdicts only; the sheet itself quotes statutory text.
+                "AUDIT/audit_log.json",
                 "paper/shared/references.bib", "paper/shared/numbers.json"):
         dst = out / rel
         dst.parent.mkdir(parents=True, exist_ok=True)
@@ -212,11 +229,10 @@ def main(argv: list[str] | None = None) -> int:
                 "benchmark_items": totals["items"],
                 # The version is not a quality claim: read this field, not the
                 # version number, to learn whether anything has been audited.
-                "items_verified_by_human": 0,
-                "verification_status": (
-                    "NOT PERFORMED - every item is status=unverified; see "
-                    "AUDIT_human_verification_required.md"
-                ),
+                # Read from the audit log written by analysis/audit_sheet.py,
+                # never typed: CI fails if more items say `verified` than this.
+                "items_verified_by_human": _audit()["items_verified_by_human"],
+                "verification_status": _audit()["summary"],
                 "redaction": "text replaced by sha256 + length; rebuild with src/nepversa/harvest.py",
             },
             indent=2,

@@ -55,7 +55,27 @@ def check_row(row: dict) -> list[Finding]:
 
     # 1. Inline markers present but nothing parsed -> the bug class that cost
     #    three provisions in the Banking Offences Act.
-    inline = {m.group(2) for m in _INLINE_RE.finditer(_fold_digits(text))}
+    #    With the page HTML, count its `<sup>` markers: that is what the source
+    #    states. The Markdown-shape fallback reads `10)` and "(1977)" as
+    #    markers; on the five-Act corpus it raised 27 such findings, all noise.
+    html_count = row.get("inline_marker_count")
+    if html_count is not None:
+        # A wholly repealed section's one marker belongs to the section itself
+        # (`1……` under "Repealed by ..."), recorded as `repealed_in_full`.
+        expected = len(units) + (1 if row.get("repealed_in_full") else 0)
+        if html_count > expected:
+            findings.append(
+                Finding(
+                    key,
+                    "MARKERS_WITHOUT_UNITS",
+                    f"page HTML carries {html_count} inline marker(s) but only "
+                    f"{len(units)} amended unit(s) were parsed ({len(footnotes)} footnotes)",
+                    url,
+                )
+            )
+        inline: set = set()
+    else:
+        inline = {m.group(2) or m.group(4) for m in _INLINE_RE.finditer(_fold_digits(text))}
     if inline and not units:
         findings.append(
             Finding(

@@ -136,12 +136,18 @@ def _numbers() -> dict:
 def _act_label(slug: str) -> str:
     """Short, readable act name for an axis tick."""
     words = slug.replace("-", " ").split()
-    year = words[-1] if words and words[-1].isdigit() else ""
+    # The site appends the Gregorian year to some slugs
+    # (`income-tax-act-2058-2002`); the Act's own year is the Bikram Sambat one
+    # before it, and that is the year the paper uses everywhere else.
+    years = [w for w in words if w.isdigit()]
+    year = years[0] if years else ""
     head = " ".join(w.title() for w in words if not w.isdigit())
     short = {
         "Banking Offence And Punishment Act": "Banking Offence",
         "Foreign Exchange Regulation Act": "Foreign Exchange",
         "Bonus Act": "Bonus",
+        "Companies Act": "Companies",
+        "Income Tax Act": "Income Tax",
     }.get(head, head)
     return f"{short}\n{year}" if year else short
 
@@ -217,7 +223,7 @@ def figure_pipeline(n: dict) -> None:
         ("Footnote\nprovenance", f'{c["amendment_units"]} units', OKABE_ITO["green"]),
         ("Validity\nwindows", f'{c["amended_provisions"]} amended', OKABE_ITO["orange"]),
         ("Candidate\nitems", f'{b["items"]} items', OKABE_ITO["vermillion"]),
-        ("Human\nverification", f'{b["status_unverified"]} pending', OKABE_ITO["grey"]),
+        ("Author\naudit", f'{b["status_verified"]} checked', OKABE_ITO["grey"]),
     ]
 
     fig, ax = plt.subplots(figsize=(6.5, 1.55))
