@@ -205,8 +205,10 @@ def _title(slug: str) -> str:
 
 def _md_table(headers: list[str], rows: list[list[str]]) -> str:
     # Dash counts set Pandoc's relative column widths: the first column holds an
-    # Act's full title and, at equal widths, wrapped one word per line.
-    widths = [14] + [max(3, len(h) // 2 + 2) for h in headers[1:]]
+    # Act's full title and, at equal widths, wrapped one word per line. A header
+    # wraps at spaces, so the longest WORD sets the floor: sized on the whole
+    # header, "Amended" got a column 7pt narrower than the word itself.
+    widths = [14] + [max(3, max(len(w) for w in h.split()) * 3 // 4 + 1) for h in headers[1:]]
     out = ["| " + " | ".join(headers) + " |",
            "|" + "|".join("-" * w for w in widths) + "|"]
     out += ["| " + " | ".join(r) + " |" for r in rows]

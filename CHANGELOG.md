@@ -10,6 +10,20 @@ or preprint, and any extraction defect found after release.
 
 ---
 
+## [Unreleased]
+
+No data change: corpus, benchmark items, gold and every number in
+`paper/shared/numbers.json` are byte-identical to v2.0.0.
+
+### Changed
+
+- `analysis/make_tables.py`: table column widths sized on the longest header
+  word (layout only; table contents unchanged).
+- `analysis/preflight_arxiv.py`: checks the two-column arXiv PDF and matches
+  capitalised section heads.
+
+---
+
 ## [2.0.0] — 2026-09-23
 
 MAJOR: every published number changes (3 → 5 Acts; 46 → 181 items), and four

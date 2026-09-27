@@ -5,7 +5,7 @@
 Checks the artefacts as a reader and as arXiv's builder will meet them, not the
 sources they came from:
 
-PDF (paper/acm/output/NEPVERSA_acm.pdf)
+PDF (paper/acm/output/NEPVERSA_arxiv.pdf, the two-column build the bundle compiles to)
   * every font embedded, none Type 3 (bitmap fonts blur and some venues reject them)
   * no unresolved reference (`??`), citation (`[?]`, `(?)`), token (`{{`) or
     placeholder (`[[`) survives into the text layer
@@ -28,7 +28,7 @@ import zipfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-PDF = ROOT / "paper" / "acm" / "output" / "NEPVERSA_acm.pdf"
+PDF = ROOT / "paper" / "acm" / "output" / "NEPVERSA_arxiv.pdf"
 ZIP = ROOT / "paper" / "acm" / "output" / "nepversa_arxiv_source.zip"
 NUMBERS = json.loads((ROOT / "paper" / "shared" / "numbers.json").read_text(encoding="utf-8"))
 ARXIV_MAX_BYTES = 50 * 1024 * 1024
@@ -55,7 +55,9 @@ def check_pdf(fails: list[str]) -> None:
             fails.append(f"{what} in PDF text: {re.search(pat, text).group(0)!r}")
     if not re.search(r"[\u0900-\u097F]{3,}", text):
         fails.append("no extractable Devanagari in the PDF text layer")
-    abstract = text[: text.find("1 Introduction")] if "1 Introduction" in text else text[:4000]
+    # sigconf sets section heads in capitals ("1 INTRODUCTION").
+    intro = re.search(r"1\s+Introduction", text, re.I)
+    abstract = text[: intro.start()] if intro else text[:4000]
     abstract = " ".join(abstract.split())
     want = {
         "acts": f"covers {NUMBERS['corpus']['acts']} Acts",

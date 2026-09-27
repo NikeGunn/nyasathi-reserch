@@ -59,7 +59,8 @@ item traces to a specific sentence in the law.
 - **Preprint:** https://doi.org/10.5281/zenodo.22916911 (not peer reviewed)
 - **Journal:** under review at ACM Transactions on Asian and Low-Resource
   Language Information Processing (TALLIP), submitted 2026-09-23
-- **arXiv:** pending
+- **arXiv:** submitted 2026-09-24 (cs.CL primary, cs.IR cross-list); awaiting
+  moderation. The identifier will be added here when announced.
 
 ## Contents
 
