@@ -138,6 +138,32 @@ def apply(sheet: Path, auditor: str, qualification: str, applied_at: str | None 
     return 0
 
 
+def reapply_from_log(log: dict) -> int:
+    """Restore item statuses from the verdicts recorded in the audit log.
+
+    Used where the sheet is absent (the public release). The log is not
+    rewritten: it is the record being restored, not a new audit. A verdict for
+    an item that is not in the benchmark is refused, because it means the
+    rebuild produced a different item set from the one that was audited.
+    """
+    verdicts = log["verdicts"]
+    by_id = {it["item_id"] for _, it in _items()}
+    unknown = sorted(set(verdicts) - by_id)
+    if unknown:
+        print("audit log refused: verdicts for items not in the benchmark:",
+              *unknown, sep="\n  ")
+        return 1
+    status = {"correct": "verified", "incorrect": "rejected_by_audit"}
+    touched: dict[Path, list[dict]] = {}
+    for f, it in _items():
+        it["status"] = status.get(verdicts.get(it["item_id"], {}).get("verdict", ""), "unverified")
+        touched.setdefault(f, []).append(it)
+    for f, items in touched.items():
+        f.write_text("".join(json.dumps(i, ensure_ascii=False) + "\n" for i in items), encoding="utf-8")
+    print(f"reapplied from log: {log['counts']} of {len(by_id)} items")
+    return 0
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -156,7 +182,11 @@ def main() -> int:
             print("no audit log; nothing to reapply")
             return 0
         log = json.loads(LOG.read_text(encoding="utf-8"))
-        return apply(AUDIT / log["sheet"], log["auditor"], log["qualification"], log["applied_at"])
+        if (AUDIT / log["sheet"]).exists():
+            return apply(AUDIT / log["sheet"], log["auditor"], log["qualification"], log["applied_at"])
+        # The public release omits the sheet (it quotes statutory text) but
+        # carries the log, which records every verdict.
+        return reapply_from_log(log)
     return apply(args.sheet, args.auditor, args.qualification)
 
 

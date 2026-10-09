@@ -10,10 +10,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # reproduce.sh compares the data with tag v2.0.0
 
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+
+      - name: Install the dependencies named in README.md
+        run: pip install pytest matplotlib defusedxml
 
       - name: Run the test suite
         # PYTHONUTF8 is set on every platform, not only Windows. The suite
@@ -106,3 +111,9 @@ jobs:
               sys.exit(f"{len(verified)} items verified, manifest records {audited} audited")
           print(f"{len(verified)} verified item(s), {audited} recorded as audited.")
           PY
+
+      - name: Every number in the paper reproduces from the v2.0.0 data
+        # The same command the README gives reviewers. It fails if the data
+        # differs from tag v2.0.0 or any recounted number differs from
+        # paper/shared/numbers.json.
+        run: bash reproduce.sh

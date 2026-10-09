@@ -210,7 +210,7 @@ def main(argv: list[str] | None = None) -> int:
     # decisions about the author's separate commercial tool.
     for rel in ("corpus/SOURCES.md", "benchmark/guidelines.md",
                 "logs/PROVENANCE.md", "logs/citations_verified.md",
-                "logs/lit_notes.md", "scripts_regenerate.sh",
+                "logs/lit_notes.md", "scripts_regenerate.sh", "reproduce.sh",
                 # Verdicts only; the sheet itself quotes statutory text.
                 "AUDIT/audit_log.json",
                 "paper/shared/references.bib", "paper/shared/numbers.json"):

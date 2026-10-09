@@ -10,17 +10,33 @@ Nikhil Bhagat · Independent Researcher, Nepal ·
 
 ---
 
-> **Reviewers: reproduce in three commands** (Python 3.12, ~2 minutes, no API key)
+> **Reviewers: reproduce the paper's numbers with one command** (Python 3.12, ~1 minute, no API key)
 >
 > ```bash
-> git clone https://github.com/NikeGunn/nyasathi-reserch && cd nyasathi-reserch && git checkout v2.0.0
+> git clone https://github.com/NikeGunn/nyasathi-reserch && cd nyasathi-reserch
 > pip install pytest matplotlib defusedxml
-> PYTHONUTF8=1 PYTHONPATH=src python -m pytest tests -q     # expect: 216 passed
+> bash reproduce.sh
+> ```
+>
+> The script runs the tests, confirms the data files are byte-identical to the
+> **v2.0.0** release cited in the paper, recounts every corpus and benchmark
+> number, and ends with `REPRODUCED` (exit 0) or lists each mismatch (exit 1):
+>
+> ```
+> Acts / provisions             5 / 455
+> Amended provisions            35 (7.7%)
+> Amendment units INS/SUB/REP   99 (47/24/28)
+> Items T2 / T3                 181 (145/36)
+> Abstention-expected           111 (61.3%)
+> Nuggets label/citation/exact  111/70/70
+> Items verified by audit       181
+> REPRODUCED: every number checked matches the paper.
 > ```
 >
 > Every number in the paper is in `paper/shared/numbers.json`, produced by
 > `analysis/make_tables.py`. Rebuilding the corpus itself from the live source
-> needs a Firecrawl key and about an hour: see [`REPRODUCE.md`](REPRODUCE.md),
+> (`bash reproduce.sh --from-source`) needs a Firecrawl key and about an hour,
+> and additionally checks all 455 provisions and 181 items by SHA-256: see [`REPRODUCE.md`](REPRODUCE.md),
 > which lists every step and the expected value of every number.
 
 ## What this is
@@ -68,7 +84,8 @@ item traces to a specific sentence in the law.
 corpus/       provision records with amendment provenance (text redacted; see Licensing)
 benchmark/    NEPVERSA items with deterministic nugget gold
 src/nepversa/ the extraction pipeline
-tests/        216 tests, every safety check mutation-tested
+tests/        219 tests (216 at tag v2.0.0), every safety check mutation-tested
+reproduce.sh  one command: tests + v2.0.0 data check + every number vs the paper
 analysis/     numbers, tables, figures, audit, release and preflight scripts
 AUDIT/        audit_log.json: who checked each item, qualification, verdict
 REPRODUCE.md  exact steps to regenerate every number from scratch
@@ -115,11 +132,13 @@ Step-by-step instructions are in [`REPRODUCE.md`](REPRODUCE.md). In short:
 
 ```bash
 pip install pytest matplotlib defusedxml
-npm i -g @mendable/firecrawl-cli && firecrawl config    # scraping backend
-bash scripts_regenerate.sh                              # corpus -> items -> numbers -> figures
-python analysis/verify_rebuild.py --released corpus/ --rebuilt corpus/raw/
-PYTHONUTF8=1 PYTHONPATH=src python -m pytest tests -q
+bash reproduce.sh                                       # quick: recount from the release (~1 min)
+
+npm i -g @mendable/firecrawl-cli && firecrawl config    # scraping backend, full rebuild only
+bash reproduce.sh --from-source                         # full: re-harvest, re-derive, compare by hash (~1 h)
 ```
+
+Both modes work in a temporary copy and never modify the repository.
 
 Each provision record carries `source_url`, `retrieved_at` and `text_sha256`, so
 a rebuild can be verified byte-for-byte against this release.

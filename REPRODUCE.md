@@ -4,6 +4,18 @@ Every number in the paper is produced by a script in this repository and read
 from `paper/shared/numbers.json`. This file lists the exact steps, in order.
 Tested on Windows 10 (Git Bash) and Ubuntu with Python 3.12.
 
+## The short version
+
+```bash
+pip install pytest matplotlib defusedxml
+bash reproduce.sh                 # ~1 min, offline: every number vs the paper
+bash reproduce.sh --from-source   # ~1 h, needs Firecrawl: full rebuild + SHA-256 check
+```
+
+`reproduce.sh` does the steps below for you, in a temporary copy, and ends
+with `REPRODUCED` or a list of mismatches. The rest of this file is the same
+procedure by hand.
+
 ## 0. Requirements
 
 ```bash
@@ -17,7 +29,7 @@ export PYTHONUTF8=1 PYTHONPATH=src       # always: Devanagari fixtures need UTF-
 ## 1. Check the code before trusting it
 
 ```bash
-python -m pytest tests -q                # expect: 216 passed
+python -m pytest tests -q                # expect: 219 passed (216 at tag v2.0.0)
 ```
 
 ## 2. Rebuild the corpus and benchmark

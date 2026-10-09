@@ -15,6 +15,22 @@ or preprint, and any extraction defect found after release.
 No data change: corpus, benchmark items, gold and every number in
 `paper/shared/numbers.json` are byte-identical to v2.0.0.
 
+### Added
+
+- `reproduce.sh`: one command for reviewers. Runs the tests, confirms the data
+  files are identical to tag v2.0.0, and compares every number with
+  `paper/shared/numbers.json`. `--from-source` re-harvests the five Acts and
+  checks all 455 provisions and 181 items against the release by SHA-256.
+
+### Fixed
+
+- `analysis/audit_sheet.py reapply` stopped the documented rebuild in this
+  public repository: it needs `AUDIT/audit_sheet_v2.csv`, which is not released
+  because it quotes statutory text. It now restores item statuses from the
+  verdicts recorded in `AUDIT/audit_log.json` when the sheet is absent, and
+  refuses a verdict for an item the rebuild did not produce. Three tests added
+  (219 total), mutation-tested. No item status or number changes.
+
 ### Changed
 
 - `analysis/make_tables.py`: table column widths sized on the longest header
