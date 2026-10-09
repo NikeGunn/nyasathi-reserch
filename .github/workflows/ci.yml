@@ -10,8 +10,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0  # reproduce.sh compares the data with tag v2.0.0
 
       - uses: actions/setup-python@v5
         with:
@@ -112,8 +110,19 @@ jobs:
           print(f"{len(verified)} verified item(s), {audited} recorded as audited.")
           PY
 
-      - name: Every number in the paper reproduces from the v2.0.0 data
-        # The same command the README gives reviewers. It fails if the data
-        # differs from tag v2.0.0 or any recounted number differs from
-        # paper/shared/numbers.json.
-        run: bash reproduce.sh
+  reproduce:
+    # The one command the README gives reviewers, on all three operating
+    # systems. It fails if a data file differs from v2.0.0 or any recounted
+    # number differs from paper/shared/numbers.json.
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install pytest
+      - run: python reproduce.py

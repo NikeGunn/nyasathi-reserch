@@ -10,34 +10,29 @@ Nikhil Bhagat · Independent Researcher, Nepal ·
 
 ---
 
-> **Reviewers: reproduce the paper's numbers with one command** (Python 3.12, ~1 minute, no API key)
+> **Reviewers: reproduce the paper's numbers with one command** (~1 minute, offline, no API key)
 >
 > ```bash
-> git clone https://github.com/NikeGunn/nyasathi-reserch && cd nyasathi-reserch
-> pip install pytest matplotlib defusedxml
-> bash reproduce.sh
+> git clone https://github.com/NikeGunn/nyasathi-reserch
+> cd nyasathi-reserch
+> pip install pytest          # optional: lets the script run the test suite too
+> python reproduce.py         # Windows, macOS, Linux (use python3 or py if needed)
 > ```
 >
-> The script runs the tests, confirms the data files are byte-identical to the
-> **v2.0.0** release cited in the paper, recounts every corpus and benchmark
-> number, and ends with `REPRODUCED` (exit 0) or lists each mismatch (exit 1):
+> Needs Python 3.10+ and nothing else (a ZIP download works too). The script
+> runs the tests, confirms every data file is byte-identical to the **v2.0.0**
+> release cited in the paper, recounts Table 3, Table 4 and Figure 2 with the
+> paper's own counting code, and ends with one line:
 >
 > ```
-> Acts / provisions             5 / 455
-> Amended provisions            35 (7.7%)
-> Amendment units INS/SUB/REP   99 (47/24/28)
-> Items T2 / T3                 181 (145/36)
-> Abstention-expected           111 (61.3%)
-> Nuggets label/citation/exact  111/70/70
-> Items verified by audit       181
 > REPRODUCED: every number checked matches the paper.
 > ```
 >
-> Every number in the paper is in `paper/shared/numbers.json`, produced by
-> `analysis/make_tables.py`. Rebuilding the corpus itself from the live source
-> (`bash reproduce.sh --from-source`) needs a Firecrawl key and about an hour,
-> and additionally checks all 455 provisions and 181 items by SHA-256: see [`REPRODUCE.md`](REPRODUCE.md),
-> which lists every step and the expected value of every number.
+> or lists each value that differs (exit status 1). It writes nothing to the
+> repository. `python reproduce.py --from-source` also re-harvests the five Acts
+> from the live source (about an hour, needs a Firecrawl key), reproduces
+> Table 5 and the item audit, and checks all 455 provisions and 181 items by
+> SHA-256: see [`REPRODUCE.md`](REPRODUCE.md).
 
 ## What this is
 
@@ -85,7 +80,7 @@ corpus/       provision records with amendment provenance (text redacted; see Li
 benchmark/    NEPVERSA items with deterministic nugget gold
 src/nepversa/ the extraction pipeline
 tests/        219 tests (216 at tag v2.0.0), every safety check mutation-tested
-reproduce.sh  one command: tests + v2.0.0 data check + every number vs the paper
+reproduce.py  one command, any OS: tests + v2.0.0 data check + every number vs the paper
 analysis/     numbers, tables, figures, audit, release and preflight scripts
 AUDIT/        audit_log.json: who checked each item, qualification, verdict
 REPRODUCE.md  exact steps to regenerate every number from scratch
@@ -132,10 +127,10 @@ Step-by-step instructions are in [`REPRODUCE.md`](REPRODUCE.md). In short:
 
 ```bash
 pip install pytest matplotlib defusedxml
-bash reproduce.sh                                       # quick: recount from the release (~1 min)
+python reproduce.py                                     # quick: recount from the release (~1 min)
 
 npm i -g @mendable/firecrawl-cli && firecrawl config    # scraping backend, full rebuild only
-bash reproduce.sh --from-source                         # full: re-harvest, re-derive, compare by hash (~1 h)
+python reproduce.py --from-source                       # full: re-harvest, re-derive, compare by hash (~1 h)
 ```
 
 Both modes work in a temporary copy and never modify the repository.

@@ -179,7 +179,7 @@ def main(argv: list[str] | None = None) -> int:
         # until someone notices, and `git status` shows the deletion among a
         # hundred other staged changes.
         keep = {
-            ".git", ".github", ".gitignore", "LICENSE", "README.md",
+            ".git", ".github", ".gitignore", ".gitattributes", "LICENSE", "README.md",
             "CITATION.cff", "CHANGELOG.md", "CONTRIBUTING.md", "VERSIONING.md",
             "AUDIT_human_verification_required.md",
             "NEPVERSA_preprint.pdf", "REPRODUCE.md",
@@ -210,7 +210,7 @@ def main(argv: list[str] | None = None) -> int:
     # decisions about the author's separate commercial tool.
     for rel in ("corpus/SOURCES.md", "benchmark/guidelines.md",
                 "logs/PROVENANCE.md", "logs/citations_verified.md",
-                "logs/lit_notes.md", "scripts_regenerate.sh", "reproduce.sh",
+                "logs/lit_notes.md", "scripts_regenerate.sh", "reproduce.sh", "reproduce.py",
                 # Verdicts only; the sheet itself quotes statutory text.
                 "AUDIT/audit_log.json",
                 "paper/shared/references.bib", "paper/shared/numbers.json"):

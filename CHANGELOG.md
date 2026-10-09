@@ -17,10 +17,14 @@ No data change: corpus, benchmark items, gold and every number in
 
 ### Added
 
-- `reproduce.sh`: one command for reviewers. Runs the tests, confirms the data
-  files are identical to tag v2.0.0, and compares every number with
-  `paper/shared/numbers.json`. `--from-source` re-harvests the five Acts and
-  checks all 455 provisions and 181 items against the release by SHA-256.
+- `reproduce.py`: one command for reviewers on Windows, macOS and Linux
+  (standard library only; pytest optional). Runs the tests, confirms every data
+  file matches v2.0.0 by SHA-256 (line-ending independent, no git needed),
+  recounts Tables 3-4 and Figure 2 and compares every value with
+  `paper/shared/numbers.json`. `--from-source` re-harvests the five Acts,
+  reproduces Table 5 and the item audit, and checks all 455 provisions and 181
+  items against the release by SHA-256. `reproduce.sh` wraps it.
+- CI runs `python reproduce.py` on ubuntu, macos and windows.
 
 ### Fixed
 
@@ -30,6 +34,8 @@ No data change: corpus, benchmark items, gold and every number in
   verdicts recorded in `AUDIT/audit_log.json` when the sheet is absent, and
   refuses a verdict for an item the rebuild did not produce. Three tests added
   (219 total), mutation-tested. No item status or number changes.
+- CI had failed on every push since v2.0.0 (`No module named pytest`): it never
+  installed its dependencies.
 
 ### Changed
 

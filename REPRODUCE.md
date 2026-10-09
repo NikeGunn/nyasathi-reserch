@@ -7,12 +7,14 @@ Tested on Windows 10 (Git Bash) and Ubuntu with Python 3.12.
 ## The short version
 
 ```bash
-pip install pytest matplotlib defusedxml
-bash reproduce.sh                 # ~1 min, offline: every number vs the paper
-bash reproduce.sh --from-source   # ~1 h, needs Firecrawl: full rebuild + SHA-256 check
+pip install pytest                   # optional, adds the test suite
+python reproduce.py                  # ~1 min, offline: every number vs the paper
+python reproduce.py --from-source    # ~1 h, needs Firecrawl: full rebuild + SHA-256 check
 ```
 
-`reproduce.sh` does the steps below for you, in a temporary copy, and ends
+Same command on Windows, macOS and Linux (`python3` or `py` if `python` is not
+on your PATH; `bash reproduce.sh` is an equivalent wrapper). CI runs it on all
+three on every push. `reproduce.py` does the steps below for you, in a temporary copy, and ends
 with `REPRODUCED` or a list of mismatches. The rest of this file is the same
 procedure by hand.
 
